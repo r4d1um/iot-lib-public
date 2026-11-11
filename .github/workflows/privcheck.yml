@@ -1,0 +1,28 @@
+# Pflicht-Check fuer dieses oeffentliche Repo: keine privaten IPs, Heimnetz-
+# Hostnamen, E-Mail-Adressen oder Zugangsdaten in irgendeiner Datei.
+name: privcheck
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: privcheck-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  privcheck:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false   # keine Abhaengigkeiten
+      - run: go vet ./... && go test ./...
+      - run: go run ./tools/privcheck .

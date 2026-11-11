@@ -1,0 +1,71 @@
+# c/neo_gps: testen, alle Ziele einmal bauen und als Release c/neo_gps/v<VERSION>
+# veroeffentlichen. Ein neues Release entsteht nur, wenn die Version in
+# src/neo_gps.h erhoeht wurde (Tags kommen aus diesem Workflow, nicht von Hand).
+# Laeuft nur, wenn sich an der Library, diesem Workflow oder den Toolchains etwas aendert.
+name: c/neo_gps
+
+on:
+  push:
+    branches: [main]
+    paths: ['c/neo_gps/**', '.github/workflows/c-neo_gps.yml', 'tools/session-setup.sh']
+  pull_request:
+    paths: ['c/neo_gps/**', '.github/workflows/c-neo_gps.yml', 'tools/session-setup.sh']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: c-neo_gps-${{ github.ref }}
+  # PRs: alten Lauf abbrechen; main: nie mitten im Release abbrechen
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write   # nur fuer den Release-Schritt
+    defaults:
+      run:
+        working-directory: c/neo_gps
+    steps:
+      - uses: actions/checkout@v6
+
+      # Toolchains aus r4d1um/setup: einmal laden, dann aus dem Cache
+      - uses: actions/cache@v5
+        with:
+          path: ~/.local/share/r4setup
+          key: r4setup-${{ hashFiles('tools/session-setup.sh') }}
+
+      - name: Toolchains
+        working-directory: .
+        run: tools/session-setup.sh
+
+      - name: Host-Tests
+        run: make test
+
+      - name: Sanitizer
+        run: gcc -std=c99 -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all -Isrc src/*.c tests/test_neo_gps.c -lm -o build/san && ./build/san
+
+      - name: CMake
+        run: cmake -S . -B cbuild && cmake --build cbuild && ctest --test-dir cbuild --output-on-failure
+
+      - name: Alle Ziele bauen, Linktest, Pakete
+        run: make -j"$(nproc)" package DIST_STRICT=1
+
+      - name: Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=$(make -s print-version)
+          tag="c/neo_gps/v$v"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag gibt es schon - Version nicht erhoeht, nichts zu tun" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # Abschnitt der Version aus dem CHANGELOG als Release-Text
+          awk -v v="## $v" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md > build/notes.md
+          gh release create "$tag" build/pkg/* --target "$GITHUB_SHA" --title "neo_gps $v" --notes-file build/notes.md
+          echo "Release $tag veroeffentlicht" >> "$GITHUB_STEP_SUMMARY"

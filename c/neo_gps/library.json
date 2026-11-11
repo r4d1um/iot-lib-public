@@ -1,0 +1,12 @@
+{
+  "name": "neo_gps",
+  "version": "1.2.0",
+  "description": "Schlanke C-Library fuer u-blox NEO-6M, NEO-7M und NEO-M8N (NMEA + UBX), ohne malloc und ohne Float.",
+  "keywords": "gps, gnss, u-blox, neo-6m, neo-7m, neo-m8n, nmea, ubx, timezone, dst",
+  "repository": { "type": "git", "url": "https://github.com/r4d1um/iot-lib-public.git" },
+  "license": "MIT",
+  "frameworks": "*",
+  "platforms": "*",
+  "build": { "srcDir": "src", "includeDir": "src" },
+  "export": { "exclude": ["tests", "build", "dist"] }
+}

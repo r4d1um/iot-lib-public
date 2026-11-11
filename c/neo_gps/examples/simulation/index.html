@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grundstücksvermessung per GPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Vermessungsprotokoll - Kopf mit Kernaussage, Steuerleiste, Lageplan + Ergebnistafel, darunter Konvergenzkurven */
+:root {
+  --bg: #f2f4f1;          /* Kartenpapier, leicht gruenstichig */
+  --panel: #fbfcfa;
+  --ink: #1b2624;
+  --ink-2: #4c5a57;
+  --ink-3: #7d8a87;
+  --rule: #d5dcd7;
+  --grid: #e3e8e4;
+  --truth: #1b2624;
+  --m-seq: #a8690d;       /* ein Geraet nacheinander - Ocker */
+  --m-snap: #3f63a6;      /* Einzelmoment - Schieferblau */
+  --m-sync: #127a5f;      /* gleichzeitig gemittelt - Vermessungsgruen */
+  --good: #127a5f;
+  --warn: #a8690d;
+  --bad: #b23a2c;
+  --plot-fill: rgba(18, 122, 95, .07);
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121816; --panel: #18201e; --ink: #e4ebe7; --ink-2: #aab8b3; --ink-3: #7c8b86;
+    --rule: #2c3734; --grid: #222b29; --truth: #e4ebe7;
+    --m-seq: #e0a33c; --m-snap: #7f9fdc; --m-sync: #3fc39c;
+    --good: #3fc39c; --warn: #e0a33c; --bad: #ef7a69; --plot-fill: rgba(63, 195, 156, .08);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121816; --panel: #18201e; --ink: #e4ebe7; --ink-2: #aab8b3; --ink-3: #7c8b86;
+  --rule: #2c3734; --grid: #222b29; --truth: #e4ebe7;
+  --m-seq: #e0a33c; --m-snap: #7f9fdc; --m-sync: #3fc39c;
+  --good: #3fc39c; --warn: #e0a33c; --bad: #ef7a69; --plot-fill: rgba(63, 195, 156, .08);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+.app { display: flex; flex-direction: column; gap: 28px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: .01em; text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(30px, 5vw, 46px); }
+h2 { font-size: 24px; }
+h3 { font-size: 18px; }
+p { margin: 0; max-width: 68ch; }
+.mono, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+
+header { display: flex; flex-direction: column; gap: 12px; }
+.lede { color: var(--ink-2); font-size: 16px; }
+
+/* Kernaussage: Tabelle nach 24 h */
+.summary { overflow-x: auto; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); }
+.summary table { width: 100%; border-collapse: collapse; min-width: 560px; }
+.summary th, .summary td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+.summary th { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+.summary td:first-child, .summary th:first-child { text-align: left; white-space: normal; }
+.summary tr:last-child td { border-bottom: 0; }
+.summary tr.best td { font-weight: 600; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 8px; vertical-align: 0; }
+.caption { font-size: 13px; color: var(--ink-3); }
+
+/* Steuerleiste */
+.controls { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 18px 28px; padding: 18px; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
+.ctl { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.ctl label, .ctl .lbl { font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.dur { display: flex; align-items: baseline; gap: 12px; }
+.dur output { font-family: var(--font-display); font-size: 30px; font-weight: 600; line-height: 1; }
+.dur .sub { color: var(--ink-3); font-size: 13px; }
+input[type=range] { width: 100%; accent-color: var(--m-sync); }
+.ticks { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button {
+  font: 500 13px/1.2 var(--font-body); color: var(--ink-2); background: transparent;
+  border: 1px solid var(--rule); border-radius: 4px; padding: 7px 11px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.seg button:hover { border-color: var(--ink-3); color: var(--ink); }
+.seg button[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); background: var(--bg); font-weight: 600; }
+.seg button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--m-snap); outline-offset: 2px; }
+.method-note { font-size: 13.5px; color: var(--ink-2); }
+
+/* Hauptbereich */
+.main { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.sheet { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; min-width: 0; }
+.sheet-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+svg { display: block; width: 100%; height: auto; }
+svg text { font-family: var(--font-mono); fill: var(--ink-2); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--ink-2); margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.lg-line { width: 18px; height: 0; border-top: 2px solid; }
+.lg-dash { border-top-style: dashed; }
+.lg-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); opacity: .6; }
+
+.results { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.kv { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.kv > div { background: var(--panel); padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.kv .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.kv .v { font-family: var(--font-display); font-size: 28px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kv .t { font-size: 12.5px; color: var(--ink-3); font-family: var(--font-mono); }
+.dev { font-family: var(--font-mono); font-size: 12.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+.dev::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.dev.good { color: var(--good); } .dev.warn { color: var(--warn); } .dev.bad { color: var(--bad); }
+
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.charts .sheet p { font-size: 13px; color: var(--ink-3); margin-top: 6px; }
+
+.notes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.notes h3 { margin-bottom: 8px; }
+.notes p, .notes li { font-size: 14px; color: var(--ink-2); }
+.notes ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+details { border-top: 1px solid var(--rule); padding-top: 10px; }
+summary { cursor: pointer; font-weight: 500; }
+.model { overflow-x: auto; margin-top: 10px; }
+.model table { border-collapse: collapse; font-size: 13px; min-width: 460px; }
+.model td, .model th { padding: 5px 10px; border-bottom: 1px solid var(--rule); text-align: left; }
+.model th { font-weight: 500; color: var(--ink-3); }
+code { font-family: var(--font-mono); font-size: 13px; background: var(--grid); padding: 1px 5px; border-radius: 3px; }
+
+@media (max-width: 860px) {
+  .controls, .main, .charts, .notes { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .est-poly, .est-dot { transition: all .25s ease; }
+}
+/* Rechenfortschritt, solange der Pi noch simuliert */
+.progress { display: flex; flex-direction: column; gap: 12px; padding: 22px; background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
+.bar { height: 10px; background: var(--grid); border-radius: 5px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--m-sync); transition: width .6s ease; }
+.progress .num { font-size: 13px; color: var(--ink-2); }
+.err { color: var(--bad); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow">neo_gps · Simulation · 4 × NEO-M8N</div>
+    <h1>Grundstücksvermessung per GPS</h1>
+    <p class="lede">Vier simulierte GPS-Module stehen an den Ecken eines Hanggrundstücks. Ihre UBX-Datenströme laufen durch die echte <span class="mono">neo_gps</span>-Library samt Sprungfilter. Wie genau lassen sich daraus Fläche und Steigung bestimmen, und wie lange muss man dafür messen?</p>
+  </header>
+
+  <section class="progress" id="progress" aria-live="polite">
+    <h2 id="progTitle">Ergebnisse werden geladen</h2>
+    <div class="bar" aria-hidden="true"><i id="progBar"></i></div>
+    <p class="num" id="progText"></p>
+  </section>
+
+  <div id="app" class="app" hidden>
+  <section class="summary" aria-label="Ergebnis nach 24 Stunden">
+    <table>
+      <thead><tr><th>Nach 24 h Messdauer</th><th>Fläche · Median</th><th>Fläche · 90 %</th><th>Steigung · Median</th><th>Steigung · 90 %</th><th>Richtung · Median</th></tr></thead>
+      <tbody id="sumBody"></tbody>
+    </table>
+  </section>
+  <p class="caption" id="sumCaption"></p>
+
+  <section class="controls" aria-label="Einstellungen">
+    <div class="ctl">
+      <label for="dur">Messdauer</label>
+      <div class="dur"><output id="durOut" for="dur">1 h</output><span class="sub" id="durSub"></span></div>
+      <input type="range" id="dur" min="0" max="100" step="1" value="50">
+      <div class="ticks" aria-hidden="true"><span>4 s</span><span>1 min</span><span>10 min</span><span>1 h</span><span>6 h</span><span>24 h</span></div>
+    </div>
+    <div class="ctl">
+      <span class="lbl" id="mLbl">Vorgehen</span>
+      <div class="seg" role="group" aria-labelledby="mLbl" id="methods"></div>
+      <p class="method-note" id="methodNote"></p>
+    </div>
+    <div class="ctl">
+      <span class="lbl" id="exLbl">Beispiellauf</span>
+      <div class="seg" role="group" aria-labelledby="exLbl" id="examples"></div>
+    </div>
+    <div class="ctl">
+      <span class="lbl" id="clLbl">Messpunkte im Plan</span>
+      <div class="seg" role="group" aria-labelledby="clLbl" id="clouds"></div>
+    </div>
+  </section>
+
+  <section class="main">
+    <div class="sheet">
+      <div class="sheet-head"><h2>Lageplan</h2><span class="eyebrow" id="planInfo"></span></div>
+      <svg id="plan" viewBox="0 0 640 560" role="img" aria-label="Lageplan mit wahrer und gemessener Grundstücksgrenze"></svg>
+      <div class="legend" id="planLegend"></div>
+    </div>
+    <div class="results">
+      <div class="kv" id="kv"></div>
+      <div class="sheet">
+        <div class="sheet-head"><h3>Höhen der Eckpunkte</h3><span class="eyebrow">relativ zum Mittel</span></div>
+        <svg id="heights" viewBox="0 0 420 220" role="img" aria-label="Höhen der Eckpunkte wahr und gemessen"></svg>
+        <div class="legend"><span><i class="lg-line lg-dash" style="border-color:var(--truth)"></i>wahr</span><span><i class="lg-line" id="hLegend"></i>gemessen</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="charts">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Fehler der Fläche</h3><span class="eyebrow">m² · 100 Läufe</span></div>
+      <svg id="cArea" viewBox="0 0 520 300" role="img" aria-label="Flächenfehler über der Messdauer"></svg>
+      <p>Linie: Median. Band: bis zum 90-%-Quantil, 9 von 10 Läufen liegen darunter.</p>
+    </div>
+    <div class="sheet">
+      <div class="sheet-head"><h3>Fehler der Steigung</h3><span class="eyebrow">%-Punkte · 100 Läufe</span></div>
+      <svg id="cSlope" viewBox="0 0 520 300" role="img" aria-label="Steigungsfehler über der Messdauer"></svg>
+      <p>Wahre Steigung: 8 %. Ein Fehler von 2 %-Punkten heißt also 6 bis 10 %.</p>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div>
+      <h3>Was die Simulation zeigt</h3>
+      <ul>
+        <li>GPS-Fehler aus Atmosphäre und Satellitenbahnen sind für nahe Empfänger fast gleich. Messen alle vier Sensoren <strong>gleichzeitig</strong>, verschieben diese Fehler das ganze Viereck, ändern aber weder Fläche noch Steigung.</li>
+        <li>Ein einzelnes Gerät, das von Ecke zu Ecke getragen wird, misst jede Ecke zu einer anderen Zeit. Der gemeinsame Fehler wandert in dieser Zeit und verzerrt die Form. Längeres Messen hilft da erst nach vielen Stunden.</li>
+        <li>Was bleibt, ist Mehrwege-Empfang (Reflexionen an Haus, Zaun, Bäumen) an jedem einzelnen Standort. Er mittelt sich über Stunden weitgehend heraus, ein Rest bleibt. Deshalb wird die Steigung nie richtig genau: Die Höhe ist bei GPS etwa doppelt so unsicher wie die Lage, und 8 % Gefälle sind auf 30 m nur 2,4 m Höhenunterschied.</li>
+        <li>Der Sprungfilter der Library hat in allen Läufen die eingestreuten Ausreißer verworfen: <span class="num" id="jumpStat"></span>.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Annahmen und Reproduktion</h3>
+      <p>Grundstück: 4 Ecken, <span class="num" id="truthArea"></span> m², Gefälle <span class="num">8 %</span> nach Süd-Südost. Start der simulierten Messung laut Library-Ortszeit: <span class="num" id="startTime"></span>.</p>
+      <details>
+        <summary>Fehlermodell (Annahmen, keine Messwerte)</summary>
+        <div class="model"><table id="modelTable"></table></div>
+      </details>
+      <details>
+        <summary>Selbst nachrechnen</summary>
+        <p style="margin-top:8px">Der Simulator liegt in <code>c/neo_gps</code> unter <code>examples/simulation/terrain_sim.c</code>. <code>make sim</code> erzeugt <code>build/sim.json</code> und diese Seite daneben; <code>cd build &amp;&amp; python3 -m http.server</code> zeigt sie an. Grundstück, Fehlermodell und Anzahl der Läufe stehen oben in der Datei.</p>
+      </details>
+    </div>
+  </section>
+  </div>
+</div>
+
+<script>
+/* Daten: sim.json neben dieser Seite. Fehlt sie noch (der Pi rechnet), zeigt
+   status.json den Fortschritt; die Seite fragt alle 5 s nach. */
+function setProgress(title, text, frac) {
+  document.getElementById("progTitle").textContent = title;
+  document.getElementById("progText").textContent = text;
+  document.getElementById("progBar").style.width = Math.round(Math.max(0, Math.min(1, frac)) * 100) + "%";
+}
+async function getJSON(url) {
+  const r = await fetch(url + "?t=" + Date.now(), { cache: "no-store" });
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+async function load() {
+  let st = null;
+  try { st = await getJSON("status.json"); } catch (e) { /* lokal ohne Pi: kein status.json */ }
+  if (st && st.state === "running") {
+    const f = st.total ? st.done / st.total : 0;
+    const what = st.phase === "examples"
+      ? `Alle ${st.total} simulierten Tage fertig, die zwei Beispieltage werden aufbereitet`
+      : `Simulierter Tag ${st.done} von ${st.total}`;
+    setProgress("Der Pi rechnet die Simulation",
+      `${what} · gestartet ${st.started || ""} · Library ${(st.commit || "").slice(0, 7)} · die Seite aktualisiert sich von selbst`, f);
+    setTimeout(load, 5000);
+    return;
+  }
+  if (st && st.state === "failed") {
+    setProgress("Simulation fehlgeschlagen", st.error || "Details: docker logs des Dienstes", 0);
+    document.getElementById("progText").className = "num err";
+    setTimeout(load, 30000);
+    return;
+  }
+  try {
+    const data = await getJSON("sim.json");
+    document.getElementById("progress").hidden = true;
+    document.getElementById("app").hidden = false;
+    app(data, st);
+  } catch (e) {
+    setProgress("Keine Ergebnisse gefunden", "sim.json fehlt. Lokal: make sim, dann im Ordner build einen Webserver starten. Neuer Versuch in 10 s.", 0);
+    setTimeout(load, 10000);
+  }
+}
+
+function app(DATA, ST) {
+
+const METHODS = [
+  { id: "seq",  name: "Ein Gerät nacheinander", short: "Nacheinander", note: "Ein Gerät wird von Ecke zu Ecke getragen: jede Ecke ein Viertel der Messdauer, dazwischen 60 s Weg. Typisches Vorgehen mit einem Handgerät." },
+  { id: "snap", name: "4 Sensoren, ein Moment", short: "Ein Moment", note: "Alle vier Sensoren gleichzeitig, aber nur die Position im letzten Augenblick. Gemeinsame Fehler fallen heraus, das Rauschen jedes Standorts bleibt voll drin." },
+  { id: "sync", name: "4 Sensoren, gemittelt", short: "Gemittelt", note: "Alle vier Sensoren gleichzeitig, jede Position über die ganze Messdauer gemittelt. Gemeinsame Fehler fallen heraus, das Rauschen mittelt sich mit der Zeit weg." }
+];
+const COLOR = { seq: "var(--m-seq)", snap: "var(--m-snap)", sync: "var(--m-sync)" };
+const state = { ti: 0, method: "sync", ex: 0, cloud: "abs" };
+const T = DATA.T, truth = DATA.truth;
+const de = (v, d = 1) => v.toLocaleString("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d });
+const NS = "http://www.w3.org/2000/svg";
+
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function fmtDur(s) {
+  if (s < 60) return s + " s";
+  if (s < 3600) return de(s / 60, s < 600 ? 1 : 0) + " min";
+  return de(s / 3600, s < 36000 ? 1 : 0) + " h";
+}
+const COMPASS = ["N","NNO","NO","ONO","O","OSO","SO","SSO","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+const compass = a => COMPASS[Math.round(((a % 360) + 360) % 360 / 22.5) % 16];
+const angDiff = (a, b) => { const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; };
+
+/* ---------- Kopf-Tabelle ---------- */
+function buildSummary() {
+  const last = T.length - 1, body = document.getElementById("sumBody");
+  METHODS.forEach(m => {
+    const s = DATA.stats[m.id];
+    const tr = document.createElement("tr");
+    if (m.id === "sync") tr.className = "best";
+    tr.innerHTML = `<td><i class="swatch" style="background:${COLOR[m.id]}"></i>${m.name}</td>
+      <td class="num">± ${de(s.area50[last])} m²</td><td class="num">± ${de(s.area90[last])} m²</td>
+      <td class="num">± ${de(s.slope50[last], 2)} %-P.</td><td class="num">± ${de(s.slope90[last], 2)} %-P.</td>
+      <td class="num">± ${de(s.aspect50[last], 0)}°</td>`;
+    body.appendChild(tr);
+  });
+  document.getElementById("sumCaption").textContent =
+    `Betrag der Abweichung vom wahren Wert (${de(truth.res.area, 0)} m², ${de(truth.res.slope_pct, 0)} % Gefälle nach ${compass(truth.res.aspect)}) über ${DATA.runs} unabhängige simulierte Tage. „90 %“: 9 von 10 Läufen sind mindestens so gut.`;
+}
+
+/* ---------- Steuerung ---------- */
+function seg(containerId, items, key) {
+  const c = document.getElementById(containerId);
+  items.forEach(it => {
+    const b = document.createElement("button");
+    b.type = "button"; b.id = containerId + "-" + it.value;
+    b.innerHTML = (it.color ? `<i class="swatch" style="background:${it.color};margin:0"></i>` : "") + it.label;
+    b.addEventListener("click", () => { state[key] = it.value; render(); });
+    c.appendChild(b);
+    it.btn = b;
+  });
+  return items;
+}
+let mBtns, exBtns, clBtns;
+
+/* ---------- Lageplan ---------- */
+const plan = document.getElementById("plan");
+const PW = 640, PH = 560, PAD = 34;
+const tc = truth.corners;
+const bb = { e0: Math.min(...tc.map(c => c[0])) - 9, e1: Math.max(...tc.map(c => c[0])) + 9,
+             n0: Math.min(...tc.map(c => c[1])) - 9, n1: Math.max(...tc.map(c => c[1])) + 9 };
+const sc = Math.min((PW - 2 * PAD) / (bb.e1 - bb.e0), (PH - 2 * PAD) / (bb.n1 - bb.n0));
+const ox = PAD + ((PW - 2 * PAD) - (bb.e1 - bb.e0) * sc) / 2, oy = PAD + ((PH - 2 * PAD) - (bb.n1 - bb.n0) * sc) / 2;
+const X = e => ox + (e - bb.e0) * sc, Y = n => PH - oy - (n - bb.n0) * sc;
+
+function drawPlanStatic() {
+  const g = el("g", {}, plan);
+  for (let e = Math.ceil(bb.e0 / 5) * 5; e <= bb.e1; e += 5) el("line", { x1: X(e), x2: X(e), y1: Y(bb.n0), y2: Y(bb.n1), stroke: "var(--grid)", "stroke-width": 1 }, g);
+  for (let n = Math.ceil(bb.n0 / 5) * 5; n <= bb.n1; n += 5) el("line", { x1: X(bb.e0), x2: X(bb.e1), y1: Y(n), y2: Y(n), stroke: "var(--grid)", "stroke-width": 1 }, g);
+  /* wahre Grenze */
+  el("polygon", { points: tc.map(c => X(c[0]) + "," + Y(c[1])).join(" "), fill: "var(--plot-fill)", stroke: "var(--truth)", "stroke-width": 1.5, "stroke-dasharray": "6 4" }, g);
+  /* Massstab 10 m */
+  const sx = X(bb.e0) + 6, sy = Y(bb.n0) - 12;
+  el("line", { x1: sx, x2: sx + 10 * sc, y1: sy, y2: sy, stroke: "var(--ink-2)", "stroke-width": 2 }, g);
+  [0, 5, 10].forEach(m => el("line", { x1: sx + m * sc, x2: sx + m * sc, y1: sy - 4, y2: sy + (m === 5 ? 0 : 4), stroke: "var(--ink-2)", "stroke-width": 1.5 }, g));
+  const t = el("text", { x: sx + 5 * sc, y: sy - 8, "text-anchor": "middle", "font-size": 12 }, g); t.textContent = "10 m";
+  /* Nordpfeil */
+  const nx = X(bb.e1) - 18, ny = Y(bb.n1) + 14;
+  el("path", { d: `M${nx},${ny} l-7,22 l7,-6 l7,6 z`, fill: "var(--ink-2)" }, g);
+  const nt = el("text", { x: nx, y: ny + 38, "text-anchor": "middle", "font-size": 12 }, g); nt.textContent = "N";
+}
+const dyn = el("g", {}, plan);
+
+function arrow(parent, e, n, az, len, stroke, dash) {
+  const a = az * Math.PI / 180, e2 = e + Math.sin(a) * len, n2 = n + Math.cos(a) * len;
+  const x1 = X(e), y1 = Y(n), x2 = X(e2), y2 = Y(n2), ang = Math.atan2(y2 - y1, x2 - x1);
+  el("line", { x1, y1, x2, y2, stroke, "stroke-width": 2, "stroke-dasharray": dash || "none" }, parent);
+  const h = 9;
+  el("path", { d: `M${x2},${y2} L${x2 - h * Math.cos(ang - .45)},${y2 - h * Math.sin(ang - .45)} L${x2 - h * Math.cos(ang + .45)},${y2 - h * Math.sin(ang + .45)} z`, fill: stroke }, parent);
+}
+
+function drawPlan(ex, est) {
+  dyn.innerHTML = "";
+  const nPts = Math.max(1, Math.min(ex.cloud[0].length, Math.floor(T[state.ti] / 60) + 1));
+  const cl = state.cloud === "abs" ? ex.cloud : ex.dcloud;
+  const pts = el("g", { opacity: .55 }, dyn);
+  for (let k = 0; k < 4; k++) {
+    for (let i = 0; i < nPts; i++) {
+      const p = cl[k][i];
+      if (p[0] < bb.e0 || p[0] > bb.e1 || p[1] < bb.n0 || p[1] > bb.n1) continue;
+      el("circle", { cx: X(p[0]).toFixed(1), cy: Y(p[1]).toFixed(1), r: 1.5, fill: "var(--ink-3)" }, pts);
+    }
+  }
+  const col = COLOR[state.method];
+  el("polygon", { class: "est-poly", points: est.g.map(c => X(c[0]) + "," + Y(c[1])).join(" "), fill: "none", stroke: col, "stroke-width": 2.5, "stroke-linejoin": "round" }, dyn);
+  /* Gefaellerichtung: wahr (gestrichelt) und gemessen */
+  const ce = tc.reduce((s, c) => s + c[0], 0) / 4, cn = tc.reduce((s, c) => s + c[1], 0) / 4;
+  arrow(dyn, ce, cn, truth.res.aspect, 7, "var(--truth)", "4 3");
+  arrow(dyn, ce, cn, est.r.aspect, 7, col);
+  const names = ["A", "B", "C", "D"];
+  tc.forEach((c, k) => {
+    el("circle", { cx: X(c[0]), cy: Y(c[1]), r: 4, fill: "var(--panel)", stroke: "var(--truth)", "stroke-width": 1.5 }, dyn);
+    const g = est.g[k];
+    el("circle", { class: "est-dot", cx: X(g[0]), cy: Y(g[1]), r: 4.5, fill: col }, dyn);
+    const dx = c[0] < ce ? -14 : 14, dy = c[1] < cn ? 18 : -10;
+    const t = el("text", { x: X(c[0]) + dx, y: Y(c[1]) + dy, "text-anchor": "middle", "font-size": 15, "font-weight": 500, fill: "var(--ink)" }, dyn);
+    t.textContent = names[k];
+  });
+  document.getElementById("planInfo").textContent =
+    `${nPts} Punkte je Sensor · ${state.cloud === "abs" ? "absolute Positionen" : "gleiche Epoche, relativ zu A"}`;
+}
+
+/* ---------- Ergebnistafel ---------- */
+function rate(err, good, warn) { return err <= good ? "good" : err <= warn ? "warn" : "bad"; }
+function drawKV(est) {
+  const r = est.r, t = truth.res;
+  const ea = r.area - t.area, es = r.slope_pct - t.slope_pct, ed = angDiff(r.aspect, t.aspect);
+  const pa = Math.abs(ea) / t.area * 100;
+  const sign = v => (v >= 0 ? "+" : "−") + de(Math.abs(v), Math.abs(v) < 10 ? 1 : 0);
+  document.getElementById("kv").innerHTML = `
+    <div><span class="k">Fläche (horizontal)</span><span class="v">${de(r.area, 0)} m²</span>
+      <span class="t">wahr ${de(t.area, 0)} m²</span><span class="dev ${rate(pa, 2, 5)}">${sign(ea)} m² · ${de(pa, 1)} %</span></div>
+    <div><span class="k">Steigung</span><span class="v">${de(r.slope_pct, 1)} %</span>
+      <span class="t">${de(r.slope_deg, 1)}° · wahr ${de(t.slope_pct, 1)} %</span><span class="dev ${rate(Math.abs(es), 1, 2.5)}">${es >= 0 ? "+" : "−"}${de(Math.abs(es), 2)} %-Punkte</span></div>
+    <div><span class="k">Gefälle nach</span><span class="v">${compass(r.aspect)} · ${de(r.aspect, 0)}°</span>
+      <span class="t">wahr ${compass(t.aspect)} · ${de(t.aspect, 0)}°</span><span class="dev ${rate(ed, 10, 25)}">${de(ed, 0)}° daneben</span></div>
+    <div><span class="k">Oberfläche (geneigt)</span><span class="v">${de(r.surface, 0)} m²</span>
+      <span class="t">wahr ${de(t.surface, 0)} m²</span><span class="dev ${rate(Math.abs(r.surface - t.surface) / t.surface * 100, 2, 5)}">${sign(r.surface - t.surface)} m²</span></div>`;
+}
+
+/* ---------- Hoehen ---------- */
+const hs = document.getElementById("heights");
+function drawHeights(est) {
+  hs.innerHTML = "";
+  const W = 420, H = 220, L = 46, R = 14, Tp = 14, B = 30;
+  const th = truth.corners.map(c => c[2]), eh = est.g.map(c => c[2]);
+  const mt = th.reduce((a, b) => a + b) / 4, me = eh.reduce((a, b) => a + b) / 4;
+  const rt = th.map(v => v - mt), re = eh.map(v => v - me);
+  const lim = Math.max(3, Math.ceil(Math.max(...rt.map(Math.abs), ...re.map(Math.abs)) + .5));
+  const y = v => Tp + (lim - v) / (2 * lim) * (H - Tp - B);
+  const step = lim > 6 ? 2 : 1;
+  for (let v = -lim; v <= lim; v += step) {
+    el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: v === 0 ? "var(--ink-3)" : "var(--grid)", "stroke-width": 1 }, hs);
+    const t = el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end", "font-size": 11 }, hs);
+    t.textContent = (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v) + " m";
+  }
+  const col = COLOR[state.method], bw = (W - L - R) / 4;
+  ["A", "B", "C", "D"].forEach((n, k) => {
+    const cx = L + bw * (k + .5);
+    el("line", { x1: cx - 22, x2: cx + 22, y1: y(rt[k]), y2: y(rt[k]), stroke: "var(--truth)", "stroke-width": 2, "stroke-dasharray": "5 3" }, hs);
+    el("line", { x1: cx, x2: cx, y1: y(rt[k]), y2: y(re[k]), stroke: col, "stroke-width": 1.5, opacity: .5 }, hs);
+    el("circle", { cx, cy: y(re[k]), r: 5, fill: col }, hs);
+    const t = el("text", { x: cx, y: H - 8, "text-anchor": "middle", "font-size": 13, fill: "var(--ink)" }, hs); t.textContent = n;
+  });
+  document.getElementById("hLegend").style.borderColor = col;
+}
+
+/* ---------- Konvergenzkurven ---------- */
+function drawChart(svg, k50, k90, unit, decimals) {
+  svg.innerHTML = "";
+  const W = 520, H = 300, L = 52, R = 16, Tp = 14, B = 34;
+  const lx0 = Math.log10(T[0]), lx1 = Math.log10(T[T.length - 1]);
+  const x = t => L + (Math.log10(t) - lx0) / (lx1 - lx0) * (W - L - R);
+  let ymax = 0;
+  METHODS.forEach(m => DATA.stats[m.id][k90].forEach(v => { if (v > ymax) ymax = v; }));
+  const raw = ymax / 5, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(f => f * mag).find(s => s >= raw);
+  ymax = Math.ceil(ymax / step) * step;
+  const y = v => Tp + (1 - v / ymax) * (H - Tp - B);
+  for (let v = 0; v <= ymax + 1e-9; v += step) {
+    el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "var(--grid)" }, svg);
+    const t = el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end", "font-size": 11 }, svg); t.textContent = de(v, step < 1 ? 1 : 0);
+  }
+  [[4, "4 s"], [60, "1 min"], [600, "10 min"], [3600, "1 h"], [21600, "6 h"], [86400, "24 h"]].forEach(([tv, lab]) => {
+    el("line", { x1: x(tv), x2: x(tv), y1: H - B, y2: H - B + 5, stroke: "var(--ink-3)" }, svg);
+    const t = el("text", { x: x(tv), y: H - B + 19, "text-anchor": tv === 4 ? "start" : tv === 86400 ? "end" : "middle", "font-size": 11 }, svg); t.textContent = lab;
+  });
+  el("line", { x1: L, x2: W - R, y1: H - B, y2: H - B, stroke: "var(--ink-3)" }, svg);
+  const order = METHODS.map(m => m.id).filter(id => id !== state.method).concat(state.method);
+  order.forEach(id => {
+    const s = DATA.stats[id], on = id === state.method;
+    const top = T.map((t, i) => `${x(t).toFixed(1)},${y(s[k90][i]).toFixed(1)}`);
+    const bot = T.map((t, i) => `${x(t).toFixed(1)},${y(s[k50][i]).toFixed(1)}`).reverse();
+    el("polygon", { points: top.concat(bot).join(" "), fill: COLOR[id], opacity: on ? .16 : .06 }, svg);
+    el("polyline", { points: T.map((t, i) => `${x(t).toFixed(1)},${y(s[k50][i]).toFixed(1)}`).join(" "), fill: "none", stroke: COLOR[id], "stroke-width": on ? 2.6 : 1.4, opacity: on ? 1 : .55 }, svg);
+  });
+  /* Markierung aktuelle Messdauer */
+  const cx = x(T[state.ti]), s = DATA.stats[state.method];
+  el("line", { x1: cx, x2: cx, y1: Tp, y2: H - B, stroke: "var(--ink-2)", "stroke-dasharray": "3 3" }, svg);
+  el("circle", { cx, cy: y(s[k50][state.ti]), r: 4.5, fill: COLOR[state.method], stroke: "var(--panel)", "stroke-width": 2 }, svg);
+  const lab = "± " + de(s[k50][state.ti], decimals) + " " + unit;
+  const tx = cx > W - 140 ? cx - 8 : cx + 8;
+  const t = el("text", { x: tx, y: Math.max(Tp + 12, y(s[k50][state.ti]) - 9), "text-anchor": cx > W - 140 ? "end" : "start", "font-size": 12, "font-weight": 500, fill: "var(--ink)" }, svg);
+  t.textContent = lab;
+}
+
+/* ---------- Gesamt ---------- */
+function render() {
+  const ex = DATA.examples[state.ex], est = ex[state.method][state.ti];
+  const t = T[state.ti];
+  document.getElementById("durOut").textContent = fmtDur(t);
+  document.getElementById("durSub").textContent = state.method === "seq" ? `je Ecke ${fmtDur(Math.max(1, Math.floor(t / 4)))}` : "alle Ecken gleichzeitig";
+  document.getElementById("dur").setAttribute("aria-valuetext", fmtDur(t));
+  mBtns.forEach(b => b.btn.setAttribute("aria-pressed", b.value === state.method));
+  exBtns.forEach(b => b.btn.setAttribute("aria-pressed", b.value === state.ex));
+  clBtns.forEach(b => b.btn.setAttribute("aria-pressed", b.value === state.cloud));
+  document.getElementById("methodNote").textContent = METHODS.find(m => m.id === state.method).note;
+  drawPlan(ex, est);
+  drawKV(est);
+  drawHeights(est);
+  drawChart(document.getElementById("cArea"), "area50", "area90", "m²", 1);
+  drawChart(document.getElementById("cSlope"), "slope50", "slope90", "%-P.", 2);
+}
+
+function init() {
+  buildSummary();
+  mBtns = seg("methods", METHODS.map(m => ({ value: m.id, label: m.short, color: COLOR[m.id] })), "method");
+  exBtns = seg("examples", DATA.examples.map((e, i) => ({ value: i, label: `${e.label} (Lauf ${e.run})` })), "ex");
+  clBtns = seg("clouds", [{ value: "abs", label: "Absolut" }, { value: "rel", label: "Gleiche Epoche" }], "cloud");
+  const slider = document.getElementById("dur");
+  slider.max = T.length - 1;
+  state.ti = T.reduce((b, v, i) => Math.abs(Math.log(v / 3600)) < Math.abs(Math.log(T[b] / 3600)) ? i : b, 0);
+  slider.value = state.ti;
+  slider.addEventListener("input", () => { state.ti = +slider.value; render(); });
+  drawPlanStatic();
+  plan.appendChild(dyn);
+  document.getElementById("planLegend").innerHTML =
+    `<span><i class="lg-line lg-dash" style="border-color:var(--truth)"></i>wahre Grenze</span>
+     <span><i class="lg-line" id="pLeg"></i>gemessene Grenze</span>
+     <span><i class="lg-dot"></i>Messpunkte (1 je Minute)</span>
+     <span>Pfeil: Gefälle nach</span>`;
+  const f = DATA.filter.reduce((a, s) => ({ e: a.e + s.events, p: a.p + s.passed, j: a.j + s.jump_epochs }), { e: 0, p: 0, j: 0 });
+  document.getElementById("jumpStat").textContent = `${f.e.toLocaleString("de-DE")} Ausreißer mit ${f.j.toLocaleString("de-DE")} Messungen, ${f.p} davon durchgerutscht`;
+  document.getElementById("truthArea").textContent = de(truth.res.area, 0);
+  document.getElementById("startTime").textContent = DATA.start;
+  const m = DATA.model;
+  document.getElementById("modelTable").innerHTML = `
+    <tr><th>Anteil</th><th>horizontal</th><th>vertikal</th><th>Zeitkonstante</th></tr>
+    <tr><td>gemeinsam (Atmosphäre, Bahnen)</td><td class="num">${de(m.com_h)} m je Achse</td><td class="num">${de(m.com_v)} m</td><td class="num">${m.com_tau / 60} min</td></tr>
+    <tr><td>Mehrwege je Sensor A/B/C/D</td><td class="num">${m.mp_h.map(v => de(v)).join(" / ")} m</td><td class="num">doppelt</td><td class="num">${m.mp_tau / 60} min</td></tr>
+    <tr><td>bleibender Rest je Sensor</td><td class="num">${m.bias_h.map(v => de(v, 2)).join(" / ")} m</td><td class="num">${m.bias_v.map(v => de(v, 2)).join(" / ")} m</td><td class="num">konstant</td></tr>
+    <tr><td>Rauschen</td><td class="num">${de(m.wn_h, 2)} m</td><td class="num">${de(m.wn_v, 2)} m</td><td class="num">1 s</td></tr>
+    <tr><td>Ausreißer 15–80 m, 1–4 s</td><td class="num" colspan="3">ca. ${m.jumps_per_day} pro Sensor und Tag</td></tr>`;
+  render();
+  const pl = document.getElementById("pLeg");
+  const upd = () => { pl.style.borderColor = COLOR[state.method]; };
+  upd();
+  document.getElementById("methods").addEventListener("click", upd);
+}
+  init();
+  const eb = document.getElementById("eyebrow");
+  eb.textContent = `neo_gps · Simulation · 4 × NEO-M8N · ${DATA.runs} Läufe à 24 h` +
+    (ST && ST.finished ? ` · auf dem Pi berechnet ${ST.finished} · Library ${(ST.commit || "").slice(0, 7)}` : "");
+}
+load();
+</script>
+</body>
+</html>
