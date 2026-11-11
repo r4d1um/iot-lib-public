@@ -5,6 +5,7 @@ Wiederverwendbare IoT-Libraries, die bedenkenlos öffentlich sein dürfen. Jede 
 | Library | Sprache | Wofür | Releases |
 |---|---|---|---|
 | [`c/neo_gps`](c/neo_gps) | C99 | u-blox NEO-6M/7M/M8N: NMEA + UBX, Sprungfilter, Ortszeit | `c/neo_gps/v*` |
+| [`cpp/stamp-display`](cpp/stamp-display) | C++17, Arduino | ST7735S-TFT, Gfx mit 6×8-Text, 1-Bit- und Speicher-Panels | `cpp/stamp-display/v*` |
 
 ## Aufbau
 
@@ -13,6 +14,7 @@ Wiederverwendbare IoT-Libraries, die bedenkenlos öffentlich sein dürfen. Jede 
 .github/workflows/        ein Workflow pro Library (<sprache>-<libname>.yml) + privcheck.yml
 tools/session-setup.sh    Toolchains aus r4d1um/setup (nur was fehlt)
 tools/privcheck/          Check auf private Inhalte (Pflicht in jedem Lauf)
+tools/mk/arduino-lib.mk   gemeinsamer Build für Arduino-Libraries (Kern als .a, Adapter als Quelle)
 ```
 
 ## Versionen und Releases
@@ -20,6 +22,10 @@ tools/privcheck/          Check auf private Inhalte (Pflicht in jedem Lauf)
 - SemVer; Schnittstellen werden nur erweitert, nie umbenannt.
 - Tag und Release heißen `<sprache>/<libname>/v<version>` und entstehen automatisch, sobald die Version der Library auf `main` erhöht wurde.
 - Jedes Release enthält die fertigen Pakete pro Ziel und `SHA256SUMS`. Welche Ziele und Toolchains es gibt, steht in der README der Library.
+
+## Arduino-Libraries
+
+Jede Arduino-Library besteht aus einem Kern ohne Arduino und einem dünnen Adapter. Der Kern wird pro Ziel vorkompiliert (`src/esp8266/lib<Name>.a`, `src/esp32/lib<Name>.a`, `precompiled=true`). Der Adapter (SPI, Wire, Client …) kommt als Quelle mit, damit er zur jeweiligen Core-Version passt. Das Release-Asset `<Name>-<v>-arduino.zip` lässt sich direkt mit `arduino-cli --libraries` oder der Arduino IDE nutzen.
 
 ## Regeln
 

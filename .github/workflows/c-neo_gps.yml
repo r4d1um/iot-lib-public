@@ -36,11 +36,11 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.local/share/r4setup
-          key: r4setup-${{ hashFiles('tools/session-setup.sh') }}
+          key: r4setup-neo_gps-${{ hashFiles('tools/session-setup.sh') }}
 
       - name: Toolchains
         working-directory: .
-        run: tools/session-setup.sh
+        run: tools/session-setup.sh avr-gcc arm-none-eabi aarch64-linux-gnu arm-linux-gnueabihf i686-linux-gnu
 
       - name: Host-Tests
         run: make test

@@ -4,7 +4,7 @@
 #   tools/session-setup.sh avr-gcc         nur die genannten
 # Nur oeffentliche Toolchains: das CI-Token dieses public Repos kann setup-private nicht lesen.
 set -eu
-R4SETUP_REF=v1.2.0
-[ "$#" -gt 0 ] || set -- avr-gcc arm-none-eabi aarch64-linux-gnu arm-linux-gnueabihf i686-linux-gnu
+R4SETUP_REF=v1.3.0
+[ "$#" -gt 0 ] || set -- avr-gcc arm-none-eabi aarch64-linux-gnu arm-linux-gnueabihf i686-linux-gnu xtensa-lx106-elf xtensa-esp32-elf
 curl -fsSL "https://raw.githubusercontent.com/r4d1um/setup/$R4SETUP_REF/bootstrap.sh" \
   | R4SETUP_REF=$R4SETUP_REF sh -s -- "$@"

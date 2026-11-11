@@ -1,0 +1,62 @@
+# cpp/stamp-display: testen, Kern fuer alle Ziele einmal bauen und als Release
+# cpp/stamp-display/v<VERSION> veroeffentlichen. Ein neues Release entsteht nur, wenn die Version
+# in library.properties erhoeht wurde (Tags kommen aus diesem Workflow, nicht von Hand).
+# Laeuft nur, wenn sich an der Library, diesem Workflow oder den Toolchains etwas aendert.
+name: cpp/stamp-display
+
+on:
+  push:
+    branches: [main]
+    paths: ['cpp/stamp-display/**', '.github/workflows/cpp-stamp-display.yml', 'tools/session-setup.sh', 'tools/mk/**']
+  pull_request:
+    paths: ['cpp/stamp-display/**', '.github/workflows/cpp-stamp-display.yml', 'tools/session-setup.sh', 'tools/mk/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpp-stamp-display-${{ github.ref }}
+  # PRs: alten Lauf abbrechen; main: nie mitten im Release abbrechen
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write   # nur fuer den Release-Schritt
+    defaults:
+      run:
+        working-directory: cpp/stamp-display
+    steps:
+      - uses: actions/checkout@v6
+
+      # Toolchains aus r4d1um/setup: einmal laden, dann aus dem Cache
+      - uses: actions/cache@v5
+        with:
+          path: ~/.local/share/r4setup
+          key: r4setup-stamp-display-${{ hashFiles('tools/session-setup.sh') }}
+
+      - name: Toolchains
+        working-directory: .
+        run: tools/session-setup.sh xtensa-lx106-elf xtensa-esp32-elf
+
+      - name: Tests, alle Ziele, Pakete
+        run: make -j"$(nproc)" package
+
+      - name: Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=$(make -s print-version)
+          tag="cpp/stamp-display/v$v"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag gibt es schon - Version nicht erhoeht, nichts zu tun" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # Abschnitt der Version aus dem CHANGELOG als Release-Text
+          awk -v v="## $v" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md > build/notes.md
+          gh release create "$tag" build/pkg/* --target "$GITHUB_SHA" --title "StampDisplay $v" --notes-file build/notes.md
+          echo "Release $tag veroeffentlicht" >> "$GITHUB_STEP_SUMMARY"
