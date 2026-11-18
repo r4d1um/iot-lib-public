@@ -7,6 +7,7 @@ Erster Schritt in jeder Session: `tools/session-setup.sh` (installiert nur, was 
 ```
 c/neo_gps/                 C99-Library für u-blox NEO (Makefile: test, dist, dist-check, package)
 cpp/stamp-display/         Arduino-Library StampDisplay (Kern .a + Adapter-Quelle, tools/mk/arduino-lib.mk)
+cpp/shift595/              Arduino-Library Shift595 für 74HC595-Ketten (C99-Kern .a + Adapter-Quelle, Fake-595 in tests/)
 .github/workflows/         <sprache>-<libname>.yml pro Library, privcheck.yml für das ganze Repo
 tools/session-setup.sh     Toolchains (nur öffentliche aus r4d1um/setup)
 tools/privcheck/           Go-Check auf private Inhalte
@@ -32,3 +33,4 @@ go.mod                     Modul nur für tools/ (Go-Libraries bekommen ihr eige
 - 2026-11-11: Build und Release in einem Job (gleiche Artefakte, keine doppelte Minute-Rundung).
 - 2026-11-11: Arduino-Libraries als vorkompilierter Kern + Adapter-Quelle: fertiger C++-Code mit Arduino-Headern passt nur zu einer Core-Version (Cloud ESP32 3.x, Netbook 2.0.17); der Kern ohne Arduino passt zu allen. ESP32-Kern mit GCC 8.4 (Core 2.0.17), linkt auch mit 3.x.
 - 2026-11-11: Kern mit RTTI gebaut: Sketches mit `-frtti` brauchen die typeinfo, Sketches ohne RTTI ignorieren sie.
+- 2026-11-18: `shift595` baut wie `char-lcd` zusätzlich AVR per `override TARGETS` und prüft mit `firmware-check` eine echte Uno-Firmware.
