@@ -1,7 +1,7 @@
 # CharLcd: hd44780 core (C99: protocol, UTF-8, PCF8574 encoding, screen buffer) precompiled;
 # the Arduino adapter CharLcd.cpp (Wire / digitalWrite) is source.
 LIB        = CharLcd
-CORE_SRC   = src/hd44780.c src/hd44780_text.c src/hd44780_pcf8574.c src/hd44780_screen.c
+CORE_SRC   = src/hd44780.c src/hd44780_text.c src/hd44780_pcf8574.c src/hd44780_595.c src/hd44780_screen.c
 TEST_SRC   = tests/test_char_lcd.cpp
 EXTRA_PKG  = LICENSE
 

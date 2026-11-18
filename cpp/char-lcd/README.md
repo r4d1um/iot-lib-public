@@ -1,7 +1,7 @@
 # CharLcd
 
 Driver for HD44780-compatible character LCDs (16x2, 20x4, 16x4, 40x2, 40x4, ...), over the
-common **PCF8574 I2C backpack** or **4-bit parallel** pins.
+common **PCF8574 I2C backpack**, **one 74HC595 shift register** (3 GPIOs) or **4-bit parallel** pins.
 
 ![sample screens](docs/screens.png)
 
@@ -40,6 +40,7 @@ Download `CharLcd-<v>-arduino.zip` from the release `cpp/char-lcd/v<v>` and inst
 #include <CharLcd.h>
 
 CharLcd lcd(0, 20, 4);                 // I2C backpack, address found automatically
+// CharLcd lcd(CharLcd::Shift595Pins(5, 6, 7), 20, 4);  // or one 74HC595: data, clock, latch
 // CharLcd lcd(12, 11, 5, 4, 3, 2, 16, 2);   // or parallel: RS, E, D4..D7, cols, rows
 
 void setup() {
@@ -61,6 +62,18 @@ lcd.refresh();                                      // only what changed goes to
 Custom characters 0..7 can also go into strings as `"\x01"`. After writing directly
 (`print`, `setCursor`, another library) call `lcd.invalidate()` before the next `refresh()`;
 `clear()` keeps the buffer in step by itself.
+
+## Wiring with a 74HC595 (3 pins)
+
+![74HC595 to HD44780](docs/wiring-74hc595.svg)
+
+QA RS, QB free (RW to GND), QC E, QD backlight through an NPN, QE..QH D4..D7 - the same bit
+layout as the I2C backpack, so `setBackpackPins()` changes both. On 3.3 V boards (ESP8266,
+ESP32) run the 595 from 3.3 V (or use a 74HCT595): a 74HC595 at 5 V needs 3.5 V for a high
+input. The LCD stays on 5 V; its inputs take the 595's 3.3 V outputs as high. Every byte is a
+full shift and latch, so E's pulse is long enough even on a 240 MHz ESP32; the core inserts one
+extra byte whenever RS changes, so RS is stable before E rises (also on the backpack). See
+`examples/ThreePins` and `cpp/shift595` for other uses of the chip.
 
 ## Use it (plain C)
 
@@ -96,6 +109,7 @@ with an E pulse; `HD44780_NIBBLE` = high nibble only, `HD44780_CHIP2` = second c
 | `hd44780_map(cp, rom)`, `hd44780_utf8_next` | UTF-8 decoding and ROM mapping |
 | `hd44780_screen_*` | buffer: `init`, `text`, `put`, `bar`, `flush`, `invalidate`, `assume_blank` |
 | `hd44780_pcf8574_*` | backpack bus, byte encoding, backlight, pin map (`HD44780_PCF8574_DEFAULT`) |
+| `hd44780_595_*` | 74HC595 bus (`write` = shift a byte + latch), backlight, pin map (`HD44780_595_DEFAULT`) |
 
 Errors: bus errors (no I2C ACK) are kept in `lcd.error` (first one since init) and returned by
 `hd44780_init`; nothing else fails. Characters without a glyph show as `?`.
@@ -108,7 +122,7 @@ Errors: bus errors (no I2C ACK) are kept in `lcd.error` (first one since init) a
   mapping follows the datasheet table and has not been checked on a real A02 module yet.
 - **Backpack pin maps:** the default is P0 RS, P1 RW, P2 E, P3 backlight, P4..P7 D4..D7. Other
   boards: `lcd.setBackpackPins({...})` before `begin()`, in C fill `hd44780_pcf8574.pins`.
-- **40x4** needs two E lines, so it works over parallel pins (`en2`), not over the usual backpack.
+- **40x4** needs two E lines, so it works over parallel pins (`en2`), not over the backpack or one 595.
 - **I2C speed:** each character is 4 expander bytes; at 100 kHz a full 20x4 redraw takes about
   40 ms, a typical `refresh()` of a few changed cells well under 5 ms.
 

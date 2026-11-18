@@ -20,20 +20,23 @@ static uint8_t nibble_byte(const hd44780_pcf8574_pins *p, uint8_t nib, int rs, i
 }
 
 uint8_t hd44780_pcf8574_encode(const hd44780_pcf8574_pins *p, uint8_t value, uint8_t flags,
-                               int backlight, uint8_t out[4])
+                               int backlight, uint8_t prev, uint8_t out[5])
 {
     uint8_t en = (uint8_t)(1u << p->en);
+    uint8_t ctl = (uint8_t)((1u << p->rs) | (1u << p->bl));
     int rs = (flags & HD44780_RS) != 0;
     uint8_t hi = nibble_byte(p, (uint8_t)(value >> 4), rs, backlight);
-    out[0] = (uint8_t)(hi | en);
-    out[1] = hi;
-    if (flags & HD44780_NIBBLE) return 2;
+    uint8_t n = 0;
+    if ((prev & ctl) != (hi & ctl) || (prev & en)) out[n++] = hi;  /* RS settles, E low */
+    out[n++] = (uint8_t)(hi | en);
+    out[n++] = hi;
+    if (flags & HD44780_NIBBLE) return n;
     {
         uint8_t lo = nibble_byte(p, (uint8_t)(value & 0x0Fu), rs, backlight);
-        out[2] = (uint8_t)(lo | en);
-        out[3] = lo;
+        out[n++] = (uint8_t)(lo | en);
+        out[n++] = lo;
     }
-    return 4;
+    return n;
 }
 
 /* At 100 kHz each expander byte takes ~90 us, longer than E's 450 ns minimum pulse, so the
@@ -42,9 +45,10 @@ uint8_t hd44780_pcf8574_encode(const hd44780_pcf8574_pins *p, uint8_t value, uin
 static int pcf_send(void *ctx, uint8_t value, uint8_t flags)
 {
     hd44780_pcf8574 *pcf = (hd44780_pcf8574 *)ctx;
-    uint8_t b[4], n;
+    uint8_t b[5], n;
     if (flags & HD44780_CHIP2) return 0;
-    n = hd44780_pcf8574_encode(&pcf->pins, value, flags, pcf->backlight, b);
+    n = hd44780_pcf8574_encode(&pcf->pins, value, flags, pcf->backlight, pcf->last, b);
+    pcf->last = b[n - 1u];
     return pcf->write(pcf->ctx, pcf->addr, b, n);
 }
 
@@ -68,5 +72,6 @@ int hd44780_pcf8574_backlight(hd44780_pcf8574 *pcf, int on)
     uint8_t b;
     pcf->backlight = on;
     b = hd44780_pcf8574_idle(&pcf->pins, on);
+    pcf->last = b;
     return pcf->write(pcf->ctx, pcf->addr, &b, 1);
 }

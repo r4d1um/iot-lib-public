@@ -4,6 +4,7 @@
 //
 //   CharLcd lcd(0x27, 20, 4);          // I2C backpack; address 0 = find it (0x20..0x27, 0x38..0x3F)
 //   CharLcd lcd(12, 11, 5, 4, 3, 2, 16, 2);  // parallel: RS, E, D4..D7, cols, rows (RW to GND)
+//   CharLcd lcd(CharLcd::Shift595Pins{5, 6, 7}, 20, 4);  // one 74HC595: data, clock, latch
 //
 //   lcd.begin();  lcd.print("23.5 °C");      // print() takes UTF-8 (ä ö ü ß ° µ Ω ...)
 //   lcd.write(0xFF);                         // write(byte) sends a raw ROM / CGRAM code
@@ -20,15 +21,22 @@
 #include "hd44780.h"
 #include "hd44780_text.h"
 #include "hd44780_pcf8574.h"
+#include "hd44780_595.h"
 #include "hd44780_screen.h"
 
 class CharLcd : public Print {
 public:
     static const uint8_t NO_PIN = 255;
+    // One 74HC595 between the board and the LCD: QA RS, QC E, QD backlight, QE..QH D4..D7.
+    struct Shift595Pins {
+        uint8_t data, clock, latch;
+        Shift595Pins(uint8_t d, uint8_t c, uint8_t l) : data(d), clock(c), latch(l) {}
+    };
 
     CharLcd(uint8_t i2cAddr, uint8_t cols, uint8_t rows, TwoWire &wire = Wire);
     CharLcd(uint8_t rs, uint8_t en, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7,
             uint8_t cols, uint8_t rows, uint8_t en2 = NO_PIN);
+    CharLcd(Shift595Pins pins, uint8_t cols, uint8_t rows);
 
     // Starts Wire (I2C) or sets the pins, initialises the display. false: no backpack answers.
     bool begin();
@@ -52,8 +60,8 @@ public:
     void scrollDisplayRight() { hd44780_scroll(&lcd_, 1); }
     void backlight(bool on = true);
     void noBacklight() { backlight(false); }
-    // Other backpack wiring than P0 RS, P1 RW, P2 E, P3 BL, P4..P7 D4..D7; call before begin().
-    void setBackpackPins(const hd44780_pcf8574_pins &pins) { pcf_.pins = pins; }
+    // Other backpack / 595 wiring than RS 0, RW 1, E 2, BL 3, D4..D7 4..7; call before begin().
+    void setBackpackPins(const hd44780_expander_pins &pins) { pcf_.pins = pins; sr_.pins = pins; }
     void setRom(hd44780_rom rom) { lcd_.rom = rom; screen_.rom = rom; }  // HD44780_ROM_A00 (default) / _A02
 
     size_t write(uint8_t code) override;                       // raw code
@@ -79,11 +87,14 @@ private:
     static int parSend(void *ctx, uint8_t value, uint8_t flags);
     static void delayUs(void *ctx, uint32_t us);
     static int i2cWrite(void *ctx, uint8_t addr, const uint8_t *bytes, uint8_t n);
+    static void srWrite(void *ctx, uint8_t byte);
     void parNibble(uint8_t nib, uint8_t en);
 
     hd44780 lcd_;
     hd44780_screen screen_;
     hd44780_pcf8574 pcf_;
+    hd44780_595 sr_;
+    bool shift_;
     TwoWire *wire_;
     uint8_t cols_, rows_;
     uint8_t rs_, en_, en2_, d_[4];

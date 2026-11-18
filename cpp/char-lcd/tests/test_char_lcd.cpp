@@ -4,6 +4,7 @@
 #include "fake_hd44780.h"
 #include "hd44780.h"
 #include "hd44780_pcf8574.h"
+#include "hd44780_595.h"
 #include "hd44780_screen.h"
 #include "hd44780_text.h"
 
@@ -124,11 +125,15 @@ static void test_controls_and_cgram() {
 
 static void test_pcf8574() {
     const hd44780_pcf8574_pins &p = HD44780_PCF8574_DEFAULT;
-    uint8_t out[4];
-    CHECK(hd44780_pcf8574_encode(&p, 0x41, HD44780_RS, 1, out) == 4);
-    CHECK(out[0] == (0x40 | 0x08 | 0x04 | 0x01) && out[1] == (0x40 | 0x08 | 0x01));
-    CHECK(out[2] == (0x10 | 0x08 | 0x04 | 0x01) && out[3] == (0x10 | 0x08 | 0x01));
-    CHECK(hd44780_pcf8574_encode(&p, 0x30, HD44780_NIBBLE, 0, out) == 2 && out[0] == 0x34 && out[1] == 0x30);
+    uint8_t out[5];
+    // RS changes (prev: command, backlight on): one E-low byte first so RS settles before E rises
+    CHECK(hd44780_pcf8574_encode(&p, 0x41, HD44780_RS, 1, 0x08, out) == 5);
+    CHECK(out[0] == (0x40 | 0x08 | 0x01));
+    CHECK(out[1] == (0x40 | 0x08 | 0x04 | 0x01) && out[2] == (0x40 | 0x08 | 0x01));
+    CHECK(out[3] == (0x10 | 0x08 | 0x04 | 0x01) && out[4] == (0x10 | 0x08 | 0x01));
+    // RS unchanged: no extra byte
+    CHECK(hd44780_pcf8574_encode(&p, 0x42, HD44780_RS, 1, out[4], out) == 4 && out[0] == (0x40 | 0x08 | 0x04 | 0x01));
+    CHECK(hd44780_pcf8574_encode(&p, 0x30, HD44780_NIBBLE, 0, 0x00, out) == 2 && out[0] == 0x34 && out[1] == 0x30);
     hd44780_pcf8574_pins low = p;
     low.bl_active_low = 1;
     CHECK(hd44780_pcf8574_idle(&low, 1) == 0 && hd44780_pcf8574_idle(&low, 0) == 0x08);
@@ -144,6 +149,7 @@ static void test_pcf8574() {
     pcf.addr = 0x27;
     pcf.pins = HD44780_PCF8574_DEFAULT;
     pcf.backlight = 1;
+    pcf.last = 0;
     hd44780 l;
     hd44780_bus b = hd44780_pcf8574_bus(&pcf);
     CHECK(hd44780_init(&l, &b, 20, 4) == 0);
@@ -158,6 +164,55 @@ static void test_pcf8574() {
     FakeLcd g;
     x.lcd = &g;
     CHECK(hd44780_init(&l, &b, 20, 4) == 2 && l.error == 2);
+}
+
+// one 74HC595: every byte is shifted and latched; the fake expander sees the same transitions
+struct Fake595Lcd {
+    FakePcf pcf;
+    static void write(void *ctx, uint8_t b) { Fake595Lcd *f = static_cast<Fake595Lcd *>(ctx); FakePcf::write(&f->pcf, f->pcf.addr, &b, 1); }
+    static void delay(void *ctx, uint32_t us) { static_cast<Fake595Lcd *>(ctx)->pcf.lcd->delayed_us += us; }
+};
+
+static void test_595() {
+    FakeLcd f;
+    Fake595Lcd x;
+    x.pcf.lcd = &f;
+    hd44780_595 sr;
+    sr.write = Fake595Lcd::write;
+    sr.delay_us = Fake595Lcd::delay;
+    sr.ctx = &x;
+    sr.pins = HD44780_595_DEFAULT;
+    sr.backlight = 1;
+    sr.last = 0;
+    hd44780 l;
+    hd44780_bus b = hd44780_595_bus(&sr);
+    CHECK(hd44780_init(&l, &b, 20, 4) == 0);
+    CHECK(f.chip[0].four_bit && f.chip[0].two_line && f.chip[0].display);
+    hd44780_set_cursor(&l, 2, 3);
+    hd44780_print(&l, "3 pins: 595 \xC2\xB0" "C");
+    CHECK_EQ(f.row(3, 20, 4), "  3 pins: 595 \xDF" "C    ");
+    // E is never high in a byte where RS changed
+    uint8_t prev = 0;
+    for (uint8_t v : x.pcf.log) {
+        if (v & 0x04) CHECK((v & 0x01) == (prev & 0x01));
+        prev = v;
+    }
+    CHECK(x.pcf.log.back() & 0x08);
+    hd44780_595_backlight(&sr, 0);
+    CHECK(x.pcf.log.back() == 0x00);
+    // a 16x2 too, and the screen buffer on top
+    FakeLcd g;
+    x.pcf.lcd = &g;
+    x.pcf.last = 0;
+    sr.last = 0;
+    hd44780_init(&l, &b, 16, 2);
+    static uint8_t mem[HD44780_SCREEN_MEM(16, 2)];
+    hd44780_screen s;
+    hd44780_screen_init(&s, 16, 2, HD44780_ROM_A00, mem);
+    hd44780_screen_assume_blank(&s);
+    hd44780_screen_text(&s, 0, 1, 16, "via 74HC595", HD44780_RIGHT);
+    hd44780_screen_flush(&s, &l);
+    CHECK_EQ(g.row(1, 16, 2), "     via 74HC595");
 }
 
 static void test_screen_buffer() {
@@ -216,6 +271,7 @@ int main() {
     test_utf8_and_rom();
     test_controls_and_cgram();
     test_pcf8574();
+    test_595();
     test_screen_buffer();
     test_bar();
     if (fails) { std::printf("%d failure(s)\n", fails); return 1; }

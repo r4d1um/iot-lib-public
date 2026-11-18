@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" width="700" height="500">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="26" y="84" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#555">Board (Uno, D1 mini, ESP32 …)</text>
+<circle cx="30" cy="120" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="26" y="111" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#222">D5 → SER</text>
+<line x1="34" y1="120" x2="200" y2="120" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<circle cx="30" cy="150" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="26" y="141" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#222">D6 → SRCLK</text>
+<line x1="34" y1="150" x2="200" y2="150" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<circle cx="30" cy="180" r="4" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="26" y="171" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#222">D7 → RCLK</text>
+<line x1="34" y1="180" x2="200" y2="180" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<rect x="200" y="95" width="120" height="280" rx="3" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="200" y="80" font-family="DejaVu Sans" font-size="14" text-anchor="start" fill="#222" font-weight="bold">U1</text>
+<text x="224" y="80" font-family="DejaVu Sans" font-size="12" text-anchor="start" fill="#555">SN74HC595N</text>
+<text x="206" y="124" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">SER 14</text>
+<text x="206" y="154" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">SRCLK 11</text>
+<text x="206" y="184" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">RCLK 12</text>
+<text x="206" y="234" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">OE 13</text>
+<text x="206" y="294" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">SRCLR 10</text>
+<text x="314" y="124" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">15 QA</text>
+<text x="314" y="154" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">1 QB</text>
+<text x="314" y="184" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">2 QC</text>
+<text x="314" y="214" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">4 QE</text>
+<text x="314" y="244" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">5 QF</text>
+<text x="314" y="274" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">6 QG</text>
+<text x="314" y="304" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">7 QH</text>
+<text x="314" y="356" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">3 QD</text>
+<line x1="200" y1="230" x2="180" y2="230" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="180" y1="230" x2="180" y2="238" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="170" y1="238" x2="190" y2="238" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="174" y1="243" x2="186" y2="243" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="178" y1="248" x2="182" y2="248" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="200" y1="290" x2="170" y2="290" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="166" y="294" font-family="DejaVu Sans" font-size="11" text-anchor="end" fill="#222">+5V</text>
+<text x="314" y="108" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">VCC 16</text>
+<line x1="310" y1="95" x2="310" y2="58" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="310" y="52" font-family="DejaVu Sans" font-size="11" text-anchor="middle" fill="#222">+5V</text>
+<circle cx="310" cy="70" r="3" fill="#222"/>
+<line x1="310" y1="70" x2="350" y2="70" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="350" y1="70" x2="350" y2="78" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="338" y1="78" x2="362" y2="78" stroke="#222" stroke-width="2.5"/>
+<line x1="338" y1="86" x2="362" y2="86" stroke="#222" stroke-width="2.5"/>
+<line x1="350" y1="86" x2="350" y2="92" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="350" y1="92" x2="350" y2="100" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="340" y1="100" x2="360" y2="100" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="344" y1="105" x2="356" y2="105" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="348" y1="110" x2="352" y2="110" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="368" y="82" font-family="DejaVu Sans" font-size="14" text-anchor="start" fill="#222" font-weight="bold">C1</text>
+<text x="392" y="82" font-family="DejaVu Sans" font-size="12" text-anchor="start" fill="#555">100 nF</text>
+<text x="246" y="370" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">GND 8</text>
+<line x1="260" y1="375" x2="260" y2="388" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="260" y1="388" x2="260" y2="396" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="250" y1="396" x2="270" y2="396" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="254" y1="401" x2="266" y2="401" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="258" y1="406" x2="262" y2="406" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="320" y1="150" x2="338" y2="150" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="344" y="154" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#555">n.c.</text>
+<rect x="500" y="95" width="100" height="280" rx="3" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="500" y="80" font-family="DejaVu Sans" font-size="14" text-anchor="start" fill="#222" font-weight="bold">LCD1</text>
+<text x="546" y="80" font-family="DejaVu Sans" font-size="12" text-anchor="start" fill="#555">20×4 HD44780</text>
+<line x1="320" y1="120" x2="500" y2="120" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="506" y="124" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">4 RS</text>
+<line x1="320" y1="180" x2="500" y2="180" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="506" y="184" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">6 E</text>
+<line x1="320" y1="210" x2="500" y2="210" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="506" y="214" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">11 D4</text>
+<line x1="320" y1="240" x2="500" y2="240" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="506" y="244" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">12 D5</text>
+<line x1="320" y1="270" x2="500" y2="270" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="506" y="274" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">13 D6</text>
+<line x1="320" y1="300" x2="500" y2="300" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="506" y="304" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">14 D7</text>
+<text x="506" y="334" font-family="DejaVu Sans" font-size="10" text-anchor="start" fill="#222">16 K</text>
+<line x1="320" y1="352" x2="350" y2="352" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<rect x="350" y="344" width="60" height="16" rx="2" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="380" y="336" font-family="DejaVu Sans" font-size="14" text-anchor="middle" fill="#222" font-weight="bold">R1</text>
+<text x="380" y="376" font-family="DejaVu Sans" font-size="12" text-anchor="middle" fill="#555">1 kΩ</text>
+<line x1="410" y1="352" x2="436" y2="352" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<circle cx="450" cy="352" r="24" fill="none" stroke="#222" stroke-width="1.5"/>
+<line x1="436" y1="338" x2="436" y2="366" stroke="#222" stroke-width="2.5"/>
+<line x1="436" y1="344" x2="458" y2="330" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="436" y1="360" x2="458" y2="374" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<polygon points="458,374 448,372 454,365" fill="#222"/>
+<line x1="458" y1="330" x2="500" y2="330" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="458" y1="374" x2="458" y2="386" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="458" y1="386" x2="458" y2="394" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="448" y1="394" x2="468" y2="394" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="452" y1="399" x2="464" y2="399" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="456" y1="404" x2="460" y2="404" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="480" y="410" font-family="DejaVu Sans" font-size="14" text-anchor="start" fill="#222" font-weight="bold">Q1</text>
+<text x="506" y="410" font-family="DejaVu Sans" font-size="12" text-anchor="start" fill="#555">BC547</text>
+<text x="594" y="124" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">VSS 1</text>
+<text x="594" y="169" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">VDD 2</text>
+<text x="594" y="214" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">V0 3</text>
+<text x="594" y="264" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">RW 5</text>
+<text x="594" y="324" font-family="DejaVu Sans" font-size="10" text-anchor="end" fill="#222">A 15</text>
+<line x1="600" y1="120" x2="620" y2="120" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="620" y1="120" x2="620" y2="128" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="610" y1="128" x2="630" y2="128" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="614" y1="133" x2="626" y2="133" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="618" y1="138" x2="622" y2="138" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="600" y1="165" x2="620" y2="165" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="626" y="169" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#222">+5V</text>
+<line x1="600" y1="260" x2="620" y2="260" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="620" y1="260" x2="620" y2="268" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="610" y1="268" x2="630" y2="268" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="614" y1="273" x2="626" y2="273" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="618" y1="278" x2="622" y2="278" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="600" y1="320" x2="620" y2="320" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="626" y="324" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#222">+5V</text>
+<line x1="600" y1="210" x2="658" y2="210" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<polygon points="662,210 654,206 654,214" fill="#222"/>
+<rect x="662" y="188" width="16" height="44" rx="2" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<line x1="670" y1="188" x2="670" y2="150" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="670" y="144" font-family="DejaVu Sans" font-size="11" text-anchor="middle" fill="#222">+5V</text>
+<line x1="670" y1="232" x2="670" y2="244" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="670" y1="244" x2="670" y2="252" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="660" y1="252" x2="680" y2="252" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="664" y1="257" x2="676" y2="257" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="668" y1="262" x2="672" y2="262" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="694" y="292" font-family="DejaVu Sans" font-size="14" text-anchor="end" fill="#222" font-weight="bold">RV1</text>
+<text x="694" y="308" font-family="DejaVu Sans" font-size="12" text-anchor="end" fill="#555">10 kΩ</text>
+<text x="20" y="444" font-family="DejaVu Sans" font-size="12" fill="#222">Data, clock and latch on any 3 GPIOs · RW fixed to GND · RV1 sets the contrast</text>
+<text x="20" y="462" font-family="DejaVu Sans" font-size="12" fill="#222">QD switches the backlight through Q1: a 595 output only gives a few mA, the backlight needs 20–100 mA</text>
+<text x="20" y="480" font-family="DejaVu Sans" font-size="12" fill="#a33">3.3 V boards (D1 mini, ESP32): U1 VCC, SRCLR and C1 to 3.3 V instead (or use a 74HCT595); the LCD stays on 5 V</text>
+</svg>

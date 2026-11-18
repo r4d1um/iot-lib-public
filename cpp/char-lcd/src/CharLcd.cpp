@@ -12,7 +12,8 @@ static uint8_t *screenMem(uint8_t &cols, uint8_t &rows) {
 }
 
 CharLcd::CharLcd(uint8_t i2cAddr, uint8_t cols, uint8_t rows, TwoWire &wire)
-    : wire_(&wire), cols_(cols), rows_(rows), rs_(NO_PIN), en_(NO_PIN), en2_(NO_PIN), barChars_(false) {
+    : shift_(false), wire_(&wire), cols_(cols), rows_(rows), rs_(NO_PIN), en_(NO_PIN), en2_(NO_PIN), barChars_(false) {
+    pcf_.last = 0;
     pcf_.write = i2cWrite;
     pcf_.delay_us = delayUs;
     pcf_.ctx = this;
@@ -26,12 +27,34 @@ CharLcd::CharLcd(uint8_t i2cAddr, uint8_t cols, uint8_t rows, TwoWire &wire)
 
 CharLcd::CharLcd(uint8_t rs, uint8_t en, uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7,
                  uint8_t cols, uint8_t rows, uint8_t en2)
-    : wire_(nullptr), cols_(cols), rows_(rows), rs_(rs), en_(en), en2_(en2), barChars_(false) {
+    : shift_(false), wire_(nullptr), cols_(cols), rows_(rows), rs_(rs), en_(en), en2_(en2), barChars_(false) {
     d_[0] = d4; d_[1] = d5; d_[2] = d6; d_[3] = d7;
     pcf_.addr = 0;
     lcd_.error = 0;
     mem_ = screenMem(cols_, rows_);
     hd44780_screen_init(&screen_, cols_, rows_, HD44780_ROM_A00, mem_);
+}
+
+CharLcd::CharLcd(Shift595Pins pins, uint8_t cols, uint8_t rows)
+    : shift_(true), wire_(nullptr), cols_(cols), rows_(rows), rs_(pins.data), en_(pins.clock), en2_(pins.latch), barChars_(false) {
+    // rs_/en_/en2_ hold data/clock/latch for the 595
+    sr_.write = srWrite;
+    sr_.delay_us = delayUs;
+    sr_.ctx = this;
+    sr_.pins = HD44780_595_DEFAULT;
+    sr_.backlight = 1;
+    sr_.last = 0;
+    pcf_.addr = 0;
+    lcd_.error = 0;
+    mem_ = screenMem(cols_, rows_);
+    hd44780_screen_init(&screen_, cols_, rows_, HD44780_ROM_A00, mem_);
+}
+
+void CharLcd::srWrite(void *ctx, uint8_t byte) {
+    CharLcd *self = static_cast<CharLcd *>(ctx);
+    shiftOut(self->rs_, self->en_, MSBFIRST, byte);
+    digitalWrite(self->en2_, HIGH);
+    digitalWrite(self->en2_, LOW);
 }
 
 int CharLcd::i2cWrite(void *ctx, uint8_t addr, const uint8_t *bytes, uint8_t n) {
@@ -77,6 +100,15 @@ bool CharLcd::begin() {
             if (pcf_.addr == 0) { lcd_.error = -1; return false; }
         }
         bus = hd44780_pcf8574_bus(&pcf_);
+    } else if (shift_) {
+        pinMode(rs_, OUTPUT);
+        pinMode(en_, OUTPUT);
+        pinMode(en2_, OUTPUT);
+        digitalWrite(en_, LOW);
+        digitalWrite(en2_, LOW);
+        srWrite(this, hd44780_pcf8574_idle(&sr_.pins, sr_.backlight));  // E low before init
+        sr_.last = hd44780_pcf8574_idle(&sr_.pins, sr_.backlight);
+        bus = hd44780_595_bus(&sr_);
     } else {
         pinMode(rs_, OUTPUT);
         pinMode(en_, OUTPUT);
@@ -110,6 +142,7 @@ void CharLcd::createChar(uint8_t slot, const uint8_t pattern[8]) {
 
 void CharLcd::backlight(bool on) {
     if (wire_) hd44780_pcf8574_backlight(&pcf_, on);
+    else if (shift_) hd44780_595_backlight(&sr_, on);
 }
 
 size_t CharLcd::write(uint8_t code) {

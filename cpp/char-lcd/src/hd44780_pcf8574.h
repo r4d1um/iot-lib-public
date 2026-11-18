@@ -20,10 +20,15 @@ typedef struct {
 /* The usual backpack: P0 RS, P1 RW, P2 E, P3 backlight, P4..P7 D4..D7. */
 extern const hd44780_pcf8574_pins HD44780_PCF8574_DEFAULT;
 
+/* Same pin map type for any 8-bit expander that drives the LCD (PCF8574, 74HC595). */
+typedef hd44780_pcf8574_pins hd44780_expander_pins;
+
 /* Encode value (see hd44780_bus.send flags) into expander bytes: for each nibble one byte with
- * E high and one with E low. Returns the number of bytes in out (2 or 4). */
+ * E high and one with E low. prev is the byte the expander shows now; if RS or the backlight
+ * differ from it, a byte with E low comes first, so RS is stable before E rises (t_AS 40 ns).
+ * Returns the number of bytes in out (2..5). */
 uint8_t hd44780_pcf8574_encode(const hd44780_pcf8574_pins *pins, uint8_t value, uint8_t flags,
-                               int backlight, uint8_t out[4]);
+                               int backlight, uint8_t prev, uint8_t out[5]);
 
 /* Expander byte that only sets the backlight (all other pins low). */
 uint8_t hd44780_pcf8574_idle(const hd44780_pcf8574_pins *pins, int backlight);
@@ -37,6 +42,7 @@ typedef struct {
     uint8_t addr;                    /* 7-bit address, usually 0x27 (PCF8574) or 0x3F (PCF8574A) */
     hd44780_pcf8574_pins pins;
     int backlight;
+    uint8_t last;                    /* byte on the expander now (set by the bus) */
 } hd44780_pcf8574;
 
 hd44780_bus hd44780_pcf8574_bus(hd44780_pcf8574 *pcf);
