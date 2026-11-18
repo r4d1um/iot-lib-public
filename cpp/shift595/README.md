@@ -29,8 +29,11 @@ Other targets: build `src/shift595.c` from source and pass a bus with your GPIO/
 | 12 | RCLK | latch pin, all chips |
 | 13 | OE | GND, or a PWM pin for brightness (active low) |
 | 10 | SRCLR | VCC |
-| 16 / 8 | VCC / GND | 2-6 V / GND, 100 nF across them at each chip |
+| 16 / 8 | VCC / GND | 2-6 V / GND, 100 nF across them at each chip (3.3 V boards: see below) |
 | 15, 1-7 | QA, QB-QH | outputs (max. 6 mA per pin, 70 mA per chip - use LED resistors) |
+
+**3.3 V boards (ESP8266, ESP32):** power the 595 from 3.3 V or use a 74HCT595 - a 74HC595 at
+5 V wants 3.5 V for a high input, so 3.3 V signals are out of spec there.
 
 Pin numbers in the library: `p` = output Q(p % 8) of chip `p / 8`, chip 0 next to the
 microcontroller, QA = 0 ... QH = 7.

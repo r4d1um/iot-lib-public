@@ -1,0 +1,287 @@
+[
+  {
+    "added_include_path": "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/cores/arduino"
+  },
+  {
+    "added_include_path": "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/variants/standard"
+  },
+  {
+    "compile": {
+      "source_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged",
+      "depfile_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged.libsdetect.d"
+    },
+    "compile_task": {
+      "args": [
+        "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+        "-c",
+        "-g",
+        "-Os",
+        "-w",
+        "-std=gnu++11",
+        "-fpermissive",
+        "-fno-exceptions",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-threadsafe-statics",
+        "-Wno-error=narrowing",
+        "-flto",
+        "-w",
+        "-x",
+        "c++",
+        "-E",
+        "-CC",
+        "-mmcu=atmega328p",
+        "-DF_CPU=16000000L",
+        "-DARDUINO=10607",
+        "-DARDUINO_AVR_UNO",
+        "-DARDUINO_ARCH_AVR",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/variants/standard",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged",
+        "-o",
+        "/dev/null",
+        "-MMD",
+        "-MF",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged.libsdetect.d"
+      ]
+    }
+  },
+  {
+    "missing_include_h": "CharLcd.h"
+  },
+  {
+    "added_include_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/libraries/CharLcd/src"
+  },
+  {
+    "compile": {
+      "source_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged",
+      "depfile_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged.libsdetect.d"
+    },
+    "compile_task": {
+      "args": [
+        "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+        "-c",
+        "-g",
+        "-Os",
+        "-w",
+        "-std=gnu++11",
+        "-fpermissive",
+        "-fno-exceptions",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-threadsafe-statics",
+        "-Wno-error=narrowing",
+        "-flto",
+        "-w",
+        "-x",
+        "c++",
+        "-E",
+        "-CC",
+        "-mmcu=atmega328p",
+        "-DF_CPU=16000000L",
+        "-DARDUINO=10607",
+        "-DARDUINO_AVR_UNO",
+        "-DARDUINO_ARCH_AVR",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/variants/standard",
+        "-I/home/claude/iot-lib-public/cpp/char-lcd/build/fw/libraries/CharLcd/src",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged",
+        "-o",
+        "/dev/null",
+        "-MMD",
+        "-MF",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged.libsdetect.d"
+      ]
+    }
+  },
+  {
+    "missing_include_h": "Wire.h"
+  },
+  {
+    "added_include_path": "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src"
+  },
+  {
+    "compile": {
+      "source_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged",
+      "depfile_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged.libsdetect.d"
+    },
+    "compile_task": {
+      "args": [
+        "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+        "-c",
+        "-g",
+        "-Os",
+        "-w",
+        "-std=gnu++11",
+        "-fpermissive",
+        "-fno-exceptions",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-threadsafe-statics",
+        "-Wno-error=narrowing",
+        "-flto",
+        "-w",
+        "-x",
+        "c++",
+        "-E",
+        "-CC",
+        "-mmcu=atmega328p",
+        "-DF_CPU=16000000L",
+        "-DARDUINO=10607",
+        "-DARDUINO_AVR_UNO",
+        "-DARDUINO_ARCH_AVR",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/variants/standard",
+        "-I/home/claude/iot-lib-public/cpp/char-lcd/build/fw/libraries/CharLcd/src",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged",
+        "-o",
+        "/dev/null",
+        "-MMD",
+        "-MF",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/sketch/ThreePins.ino.cpp.merged.libsdetect.d"
+      ]
+    }
+  },
+  {
+    "missing_include_h": ""
+  },
+  {
+    "compile": {
+      "source_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/libraries/CharLcd/src/CharLcd.cpp",
+      "depfile_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/libraries/CharLcd/CharLcd.cpp.libsdetect.d"
+    },
+    "compile_task": {
+      "args": [
+        "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+        "-c",
+        "-g",
+        "-Os",
+        "-w",
+        "-std=gnu++11",
+        "-fpermissive",
+        "-fno-exceptions",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-threadsafe-statics",
+        "-Wno-error=narrowing",
+        "-flto",
+        "-w",
+        "-x",
+        "c++",
+        "-E",
+        "-CC",
+        "-mmcu=atmega328p",
+        "-DF_CPU=16000000L",
+        "-DARDUINO=10607",
+        "-DARDUINO_AVR_UNO",
+        "-DARDUINO_ARCH_AVR",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/variants/standard",
+        "-I/home/claude/iot-lib-public/cpp/char-lcd/build/fw/libraries/CharLcd/src",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/libraries/CharLcd/src/CharLcd.cpp",
+        "-o",
+        "/dev/null",
+        "-MMD",
+        "-MF",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/libraries/CharLcd/CharLcd.cpp.libsdetect.d"
+      ]
+    }
+  },
+  {
+    "missing_include_h": ""
+  },
+  {
+    "compile": {
+      "source_path": "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src/Wire.cpp",
+      "depfile_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/libraries/Wire/Wire.cpp.libsdetect.d"
+    },
+    "compile_task": {
+      "args": [
+        "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+        "-c",
+        "-g",
+        "-Os",
+        "-w",
+        "-std=gnu++11",
+        "-fpermissive",
+        "-fno-exceptions",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-threadsafe-statics",
+        "-Wno-error=narrowing",
+        "-flto",
+        "-w",
+        "-x",
+        "c++",
+        "-E",
+        "-CC",
+        "-mmcu=atmega328p",
+        "-DF_CPU=16000000L",
+        "-DARDUINO=10607",
+        "-DARDUINO_AVR_UNO",
+        "-DARDUINO_ARCH_AVR",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/variants/standard",
+        "-I/home/claude/iot-lib-public/cpp/char-lcd/build/fw/libraries/CharLcd/src",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+        "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src/Wire.cpp",
+        "-o",
+        "/dev/null",
+        "-MMD",
+        "-MF",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/libraries/Wire/Wire.cpp.libsdetect.d"
+      ]
+    }
+  },
+  {
+    "missing_include_h": ""
+  },
+  {
+    "compile": {
+      "source_path": "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src/utility/twi.c",
+      "depfile_path": "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/libraries/Wire/utility/twi.c.libsdetect.d"
+    },
+    "compile_task": {
+      "args": [
+        "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+        "-c",
+        "-g",
+        "-Os",
+        "-w",
+        "-std=gnu++11",
+        "-fpermissive",
+        "-fno-exceptions",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-threadsafe-statics",
+        "-Wno-error=narrowing",
+        "-flto",
+        "-w",
+        "-x",
+        "c++",
+        "-E",
+        "-CC",
+        "-mmcu=atmega328p",
+        "-DF_CPU=16000000L",
+        "-DARDUINO=10607",
+        "-DARDUINO_AVR_UNO",
+        "-DARDUINO_ARCH_AVR",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/cores/arduino",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/variants/standard",
+        "-I/home/claude/iot-lib-public/cpp/char-lcd/build/fw/libraries/CharLcd/src",
+        "-I/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src",
+        "/root/.local/share/r4setup/arduino-avr/1.8.6-r1/packages/arduino/hardware/avr/1.8.6/libraries/Wire/src/utility/twi.c",
+        "-o",
+        "/dev/null",
+        "-MMD",
+        "-MF",
+        "/home/claude/iot-lib-public/cpp/char-lcd/build/fw/ex-ThreePins/libraries/Wire/utility/twi.c.libsdetect.d"
+      ]
+    }
+  },
+  {
+    "missing_include_h": ""
+  }
+]
