@@ -8,6 +8,7 @@ Wiederverwendbare IoT-Libraries, die bedenkenlos öffentlich sein dürfen. Jede 
 | [`cpp/stamp-display`](cpp/stamp-display) | C++17, Arduino | ST7735S-TFT, Gfx mit 6×8-Text, 1-Bit- und Speicher-Panels | `cpp/stamp-display/v*` |
 | [`cpp/shift595`](cpp/shift595) | C99-Kern + Arduino | 74HC595-Ketten (1–32): Pins, Bytes, LED-Balken, Schreiben nur bei Änderung; shiftOut oder SPI, Helligkeit über OE | `cpp/shift595/v*` |
 | [`cpp/char-lcd`](cpp/char-lcd) | C99-Kern + Arduino | HD44780-Text-LCDs (16x2 … 40x4) über PCF8574-I2C, einen 74HC595 (3 Pins) oder 4-Bit parallel, UTF-8, Screen-Buffer | `cpp/char-lcd/v*` |
+| [`cpp/rc522`](cpp/rc522) | C99-Kern + Arduino | MFRC522-RFID-Leser (RFID-RC522): UIDs (4/7/10 Byte, mehrere Karten), Kartentyp, MIFARE Classic lesen/schreiben, Ultralight/NTAG | `cpp/rc522/v*` |
 
 ## Aufbau
 
