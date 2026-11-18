@@ -7,7 +7,7 @@ Wiederverwendbare IoT-Libraries, die bedenkenlos öffentlich sein dürfen. Jede 
 | [`c/neo_gps`](c/neo_gps) | C99 | u-blox NEO-6M/7M/M8N: NMEA + UBX, Sprungfilter, Ortszeit | `c/neo_gps/v*` |
 | [`cpp/stamp-display`](cpp/stamp-display) | C++17, Arduino | ST7735S-TFT, Gfx mit 6×8-Text, 1-Bit- und Speicher-Panels | `cpp/stamp-display/v*` |
 | [`cpp/shift595`](cpp/shift595) | C99-Kern + Arduino | 74HC595-Ketten (1–32): Pins, Bytes, LED-Balken, Schreiben nur bei Änderung; shiftOut oder SPI, Helligkeit über OE | `cpp/shift595/v*` |
-| [`cpp/char-lcd`](cpp/char-lcd) | C99-Kern + Arduino | HD44780-Text-LCDs (16x2 … 40x4) über PCF8574-I2C oder 4-Bit parallel, UTF-8, Screen-Buffer | `cpp/char-lcd/v*` |
+| [`cpp/char-lcd`](cpp/char-lcd) | C99-Kern + Arduino | HD44780-Text-LCDs (16x2 … 40x4) über PCF8574-I2C, einen 74HC595 (3 Pins) oder 4-Bit parallel, UTF-8, Screen-Buffer | `cpp/char-lcd/v*` |
 
 ## Aufbau
 
