@@ -1,0 +1,63 @@
+# cpp/shift595: testen, Kern fuer alle Ziele einmal bauen und als Release
+# cpp/shift595/v<VERSION> veroeffentlichen. Ein neues Release entsteht nur, wenn die Version
+# in library.properties erhoeht wurde (Tags kommen aus diesem Workflow, nicht von Hand).
+# Laeuft nur, wenn sich an der Library, diesem Workflow oder den Toolchains etwas aendert.
+name: cpp/shift595
+
+on:
+  push:
+    branches: [main]
+    paths: ['cpp/shift595/**', '.github/workflows/cpp-shift595.yml', 'tools/session-setup.sh', 'tools/mk/**']
+  pull_request:
+    paths: ['cpp/shift595/**', '.github/workflows/cpp-shift595.yml', 'tools/session-setup.sh', 'tools/mk/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cpp-shift595-${{ github.ref }}
+  # PRs: alten Lauf abbrechen; main: nie mitten im Release abbrechen
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write   # nur fuer den Release-Schritt
+    defaults:
+      run:
+        working-directory: cpp/shift595
+    steps:
+      - uses: actions/checkout@v6
+
+      # Toolchains aus r4d1um/setup: einmal laden, dann aus dem Cache
+      - uses: actions/cache@v5
+        with:
+          path: ~/.local/share/r4setup
+          key: r4setup-shift595-${{ hashFiles('tools/session-setup.sh') }}
+
+      - name: Toolchains
+        working-directory: .
+        run: tools/session-setup.sh xtensa-lx106-elf xtensa-esp32-elf avr-gcc arduino-cli arduino-avr
+
+      # make test (ASan/UBSan, Fake-74HC595-Kette) -> alle Ziele -> Pakete -> echte Uno-Firmware gegen das Zip
+      - name: Tests, alle Ziele, Pakete, Firmware
+        run: make -j"$(nproc)" firmware-check
+
+      - name: Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=$(make -s print-version)
+          tag="cpp/shift595/v$v"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag gibt es schon - Version nicht erhoeht, nichts zu tun" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # Abschnitt der Version aus dem CHANGELOG als Release-Text
+          awk -v v="## $v" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md > build/notes.md
+          gh release create "$tag" build/pkg/* --target "$GITHUB_SHA" --title "Shift595 $v" --notes-file build/notes.md
+          echo "Release $tag veroeffentlicht" >> "$GITHUB_STEP_SUMMARY"
