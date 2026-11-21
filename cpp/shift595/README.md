@@ -12,10 +12,10 @@ graphs, and `update()` shifts them out only when something changed.
 
 | Target | Folder in the Arduino zip | Compiler |
 |---|---|---|
-| ESP8266 (core 3.1.x) | `src/esp8266/` | xtensa-lx106-elf GCC 10.3 (r4d1um/setup) |
-| ESP32 (core 2.0.x and 3.x) | `src/esp32/` | xtensa-esp32-elf GCC 8.4 (r4d1um/setup) |
-| Uno / Nano / Pro Mini | `src/atmega328p/` | avr-gcc 7.3 (r4d1um/setup) |
-| Mega 2560 | `src/atmega2560/` | avr-gcc 7.3 (r4d1um/setup) |
+| ESP8266 (core 3.1.x) | `src/esp8266/` | xtensa-lx106-elf GCC 10.3 (esp-quick-toolchain, compiler of core 3.1.2) |
+| ESP32 (core 2.0.x and 3.x) | `src/esp32/` | xtensa-esp32-elf GCC 8.4 (crosstool-NG esp-2021r2-patch5, compiler of core 2.0.17) |
+| Uno / Nano / Pro Mini | `src/atmega328p/` | avr-gcc 7.3 (Ubuntu `gcc-avr`, same GCC as AVR core 1.8.6) |
+| Mega 2560 | `src/atmega2560/` | avr-gcc 7.3 (Ubuntu `gcc-avr`, same GCC as AVR core 1.8.6) |
 | Linux x86_64 (tests, PC tools) | `.tar.gz` | gcc |
 
 Other targets: build `src/shift595.c` from source and pass a bus with your GPIO/SPI functions.

@@ -16,7 +16,7 @@ AR_atmega2560  = avr-gcc-ar
 FL_atmega2560  = -Os -mmcu=atmega2560
 include ../../tools/mk/arduino-lib.mk
 
-# Real firmware (Arduino Uno, arduino-cli + AVR core from r4d1um/setup) against the packaged zip.
+# Real firmware (Arduino Uno, arduino-cli + Arduino AVR core 1.8.6) against the packaged zip.
 .PHONY: firmware-check
 firmware-check: package
 	rm -rf $(BUILD)/fw && mkdir -p $(BUILD)/fw/libraries

@@ -13,7 +13,7 @@ The adapter is thin and depends on the core version. The core depends on no core
 
 ## Platforms
 
-| Target | `.a` built with (from [r4d1um/setup](https://github.com/r4d1um/setup) v1.3.0) | Flags | Tested with |
+| Target | `.a` built with (pinned in [tools/toolchains.sh](../../tools/toolchains.sh)) | Flags | Tested with |
 |---|---|---|---|
 | `esp8266` | xtensa-lx106-elf GCC 10.3 (compiler of core 3.1.2) | `-Os -mlongcalls -mtext-section-literals -falign-functions=4` | core 3.1.2, NodeMCU v2 / D1 mini |
 | `esp32` | xtensa-esp32-elf GCC 8.4 (compiler of core 2.0.17) | `-Os -mlongcalls -fstrict-volatile-bitfields` | core 2.0.17 and 3.x |
@@ -107,7 +107,7 @@ All coordinates are clipped to the panel, so values outside the panel are not an
 ## Build and test
 
 ```sh
-../../tools/session-setup.sh          # cross compilers from r4d1um/setup
+export PATH="$(../../tools/toolchains.sh | paste -sd:):$PATH"   # ESP cross compilers
 make test                              # PC tests with sanitizers against the host .a
 make package                           # all targets + release packages in build/pkg/
 ```

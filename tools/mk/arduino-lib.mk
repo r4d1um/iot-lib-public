@@ -23,8 +23,8 @@ BUILD     = build
 PKG       = $(BUILD)/pkg
 TAR_DET   = tar --sort=name --mtime='2000-01-01 00:00Z' --owner=0 --group=0 --numeric-owner
 
-# Targets: name, compiler, flags. ESP8266: the compiler of core 3.1.2 (xtensa-lx106-elf from
-# r4d1um/setup); ESP32: GCC 8.4 of core 2.0.17, links with core 3.x too. The Arduino folder name of
+# Targets: name, compiler, flags. ESP8266: the compiler of core 3.1.2 (xtensa-lx106-elf GCC 10.3,
+# tools/toolchains.sh); ESP32: GCC 8.4 of core 2.0.17, links with core 3.x too. The Arduino folder name of
 # each .a is the core's build.mcu.
 TARGETS        = linux-x86_64 esp8266 esp32
 CXX_linux-x86_64 = g++
