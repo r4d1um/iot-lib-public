@@ -7,9 +7,9 @@ name: cpp/char-lcd
 on:
   push:
     branches: [main]
-    paths: ['cpp/char-lcd/**', '.github/workflows/cpp-char-lcd.yml', 'tools/session-setup.sh', 'tools/mk/**']
+    paths: ['cpp/char-lcd/**', '.github/workflows/cpp-char-lcd.yml', 'tools/toolchains.sh', 'tools/mk/**']
   pull_request:
-    paths: ['cpp/char-lcd/**', '.github/workflows/cpp-char-lcd.yml', 'tools/session-setup.sh', 'tools/mk/**']
+    paths: ['cpp/char-lcd/**', '.github/workflows/cpp-char-lcd.yml', 'tools/toolchains.sh', 'tools/mk/**']
   workflow_dispatch:
 
 permissions:
@@ -32,15 +32,43 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # toolchains from r4d1um/setup: download once, then from the cache
+      # ESP cross compilers (those of Arduino ESP8266 core 3.1.2 / ESP32 core 2.0.17) from their
+      # upstream releases, SHA-256 pinned in tools/toolchains.sh; one cache shared by all workflows
       - uses: actions/cache@v5
         with:
-          path: ~/.local/share/r4setup
-          key: r4setup-char-lcd-${{ hashFiles('tools/session-setup.sh') }}
+          path: ~/.cache/iot-lib-public/toolchains
+          key: toolchains-${{ hashFiles('tools/toolchains.sh') }}
 
-      - name: Toolchains
+      - name: ESP toolchains
         working-directory: .
-        run: tools/session-setup.sh xtensa-lx106-elf xtensa-esp32-elf avr-gcc arduino-cli arduino-avr
+        run: tools/toolchains.sh
+
+      # AVR: Ubuntu's gcc-avr 7.3 (same GCC as Arduino AVR core 1.8.6), cached; no postinst needed.
+      # Bump "version" to force a fresh install.
+      - uses: awalsh128/cache-apt-pkgs-action@v1.6.3
+        with:
+          packages: gcc-avr avr-libc binutils-avr
+          version: "1"
+
+      # arduino-cli + Arduino AVR core for the real Uno firmware (firmware-check)
+      - uses: arduino/setup-arduino-cli@v2   # Node 24
+        with:
+          version: 1.x
+          token: ${{ github.token }}
+      - uses: actions/cache@v5
+        with:
+          path: ~/.arduino15
+          key: arduino15-avr-1.8.6
+      - name: Arduino AVR core
+        working-directory: .
+        run: arduino-cli core list | grep -q '^arduino:avr  *1\.8\.6 ' || { arduino-cli core update-index && arduino-cli core install arduino:avr@1.8.6; }
+
+      - name: Toolchain versions
+        working-directory: .
+        run: |
+          for c in gcc xtensa-lx106-elf-gcc xtensa-esp32-elf-gcc avr-gcc; do
+            printf '%-24s %s\n' "$c" "$($c --version | head -1)" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
 
       # make test (ASan/UBSan, fake HD44780) -> all targets -> packages -> real Uno firmware against the zip
       - name: Tests, all targets, packages, firmware

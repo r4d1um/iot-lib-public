@@ -15,7 +15,7 @@ Reusable IoT libraries that are fine to be public. GitHub Actions checks every l
 ```
 <language>/<libname>/     source, tests, examples, README, CHANGELOG
 .github/workflows/        one workflow per library (<language>-<libname>.yml) + privcheck.yml
-tools/session-setup.sh    toolchains from r4d1um/setup (only what is missing)
+tools/toolchains.sh       pinned ESP cross compilers from their upstream releases (only what is missing)
 tools/privcheck/          check for private content (mandatory on every run)
 tools/mk/arduino-lib.mk   shared build for Arduino libraries (core as .a, adapter as source)
 ```
