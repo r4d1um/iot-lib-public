@@ -7,6 +7,7 @@ Reusable IoT libraries that are fine to be public. GitHub Actions checks every l
 | [`cpp/stamp-display`](cpp/stamp-display) | C++17, Arduino | ST7735S TFT, Gfx with 6×8 text, 1-bit and in-memory panels | `cpp/stamp-display/v*` |
 | [`cpp/shift595`](cpp/shift595) | C99 core + Arduino | 74HC595 chains (1–32): pins, bytes, LED bars, writes only on change; shiftOut or SPI, brightness via OE | `cpp/shift595/v*` |
 | [`cpp/char-lcd`](cpp/char-lcd) | C99 core + Arduino | HD44780 character LCDs (16x2 … 40x4) via PCF8574 I2C, one 74HC595 (3 pins) or 4-bit parallel, UTF-8, screen buffer | `cpp/char-lcd/v*` |
+| [`cpp/rc522`](cpp/rc522) | C99 core + Arduino | MFRC522 RFID reader (RFID-RC522): UIDs (4/7/10 bytes, several cards), card type, read/write MIFARE Classic, Ultralight/NTAG | `cpp/rc522/v*` |
 
 **Moved:** the u-blox NEO GPS library `neo_gps` now lives in its own repo, [r4d1um/neo-gps](https://github.com/r4d1um/neo-gps) (releases `v*` from 1.2.1 on). The old releases `c/neo_gps/v*` stay here so existing references keep working.
 
