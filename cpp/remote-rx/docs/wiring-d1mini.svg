@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 330" width="680" height="330">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="60" y="70" width="150" height="180" rx="3" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="60" y="56" font-family="DejaVu Sans" font-size="14" text-anchor="start" fill="#222" font-weight="bold">U1</text>
+<text x="84" y="56" font-family="DejaVu Sans" font-size="12" text-anchor="start" fill="#555">D1 mini (ESP8266)</text>
+<rect x="450" y="70" width="170" height="180" rx="3" fill="#fff" stroke="#222" stroke-width="1.5"/>
+<text x="450" y="56" font-family="DejaVu Sans" font-size="14" text-anchor="start" fill="#222" font-weight="bold">U2</text>
+<text x="474" y="56" font-family="DejaVu Sans" font-size="12" text-anchor="start" fill="#555">KY-022 (VS1838B)</text>
+<text x="204" y="114" font-family="DejaVu Sans" font-size="11" text-anchor="end" fill="#222">D5 · GPIO14</text>
+<text x="456" y="114" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#222">Y / S  signal</text>
+<line x1="210" y1="110" x2="450" y2="110" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="204" y="164" font-family="DejaVu Sans" font-size="11" text-anchor="end" fill="#222">3V3</text>
+<text x="456" y="164" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#222">R / +  VCC</text>
+<line x1="210" y1="160" x2="450" y2="160" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="204" y="214" font-family="DejaVu Sans" font-size="11" text-anchor="end" fill="#222">GND</text>
+<text x="456" y="214" font-family="DejaVu Sans" font-size="11" text-anchor="start" fill="#222">G / −  GND</text>
+<line x1="210" y1="210" x2="450" y2="210" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<circle cx="400" cy="160" r="3" fill="#222"/>
+<circle cx="400" cy="210" r="3" fill="#222"/>
+<line x1="400" y1="160" x2="400" y2="178" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<line x1="388" y1="178" x2="412" y2="178" stroke="#222" stroke-width="2.5"/>
+<line x1="388" y1="186" x2="412" y2="186" stroke="#222" stroke-width="2.5"/>
+<line x1="400" y1="186" x2="400" y2="210" stroke="#222" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<text x="330" y="186" font-family="DejaVu Sans" font-size="14" text-anchor="end" fill="#222" font-weight="bold">C1</text>
+<text x="372" y="186" font-family="DejaVu Sans" font-size="11" text-anchor="end" fill="#555">100 nF</text>
+<text x="20" y="290" font-family="DejaVu Sans" font-size="12" fill="#222">ESP32: signal to GPIO 4 · Uno/Nano: pin 2 or 3 (interrupt pins), VCC 5 V</text>
+<text x="20" y="310" font-family="DejaVu Sans" font-size="12" fill="#222">On 3.3 V boards power the module from 3.3 V: its output is pulled up to its own VCC</text>
+</svg>
